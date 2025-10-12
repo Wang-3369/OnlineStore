@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/cart.css') }}">
+<h2>購物車</h2>
+
+<table border="1" cellpadding="5">
+    <thead>
+        <tr>
+            <th>商品名稱</th>
+            <th>單價</th>
+            <th>數量</th>
+            <th>小計</th>
+            <th>操作</th>
+        </tr>
+    </thead>
+    <tbody id="cart-body"></tbody>
+</table>
+
+<p id="total-price"></p>
+<button id="checkout-btn">結帳</button>
+
+<script src="{{ url_for('static', filename='js/cart.js') }}"></script>
+{% endblock %}

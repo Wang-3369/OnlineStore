@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title or "北寧路早餐店" }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>北寧路早餐店</h1>
+        <nav>
+            <a href="/">首頁</a>
+            <a href="/cart">購物車</a>
+            {% if session.get("username") %}
+                {% if session.get("role") in ["admin", "sub-admin"]%}
+                    <a href="/admin">管理後台</a>
+                {% endif %}
+                <a href="/logout">登出</a>
+            {% else %}
+                <a href="/login">登入</a>
+                <a href="/register">註冊</a>
+            {% endif %}
+        </nav>
+
+        <!-- 使用者圖示 -->
+        <img id="user-icon" src="{{ url_for('static', filename='images/user.png') }}" 
+             style="width:40px;cursor:pointer;position:absolute;top:10px;right:10px;">
+
+        <!-- 使用者 popup -->
+        <div id="user-popup">
+            {% if session.get("username") %}
+                <p id="username">使用者：{{ session.get("username") }}</p>
+
+                {% if session.get("role") == "admin" %}
+                    <button id="admin-btn">管理後台使用者</button>
+                {% endif %}
+
+
+                <button id="logout-btn">登出</button>
+            {% else %}
+                <p id="user-status">未登入</p>
+                <button id="login-btn">登入</button>
+            {% endif %}
+        </div>
+
+        </div>
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <p>©北寧路早餐店</p>
+    </footer>
+
+    <script defer src="{{ url_for('static', filename='js/user_popup.js') }}"></script>
+</body>
+</html>

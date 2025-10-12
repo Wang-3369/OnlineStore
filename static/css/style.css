@@ -1,0 +1,117 @@
+/* 全局樣式 */
+body {
+    font-family: "Noto Sans TC", sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #fafafa;
+}
+
+/* Header */
+header {
+    background: #222;
+    color: white;
+    padding: 1em;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+}
+
+nav a {
+    color: white;
+    margin-left: 1em;
+    text-decoration: none;
+}
+
+nav a:hover {
+    text-decoration: underline;
+}
+
+/* 使用者圖示 */
+#user-icon {
+    width: 40px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+#user-icon:hover {
+    transform: scale(1.1);
+}
+
+/* 使用者 popup */
+#user-popup {
+    display: none;
+    position: absolute;
+    top: 60px;
+    right: 10px;
+    background: #fff;
+    border: 1px solid #ccc;
+    padding: 15px;
+    text-align: center;
+    z-index: 100;
+    width: 180px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+#user-popup.show {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+#user-popup p {
+    margin: 10px 0;
+    font-weight: bold;
+    color: #333;
+}
+
+#user-popup button {
+    margin: 5px;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+#user-popup button:hover {
+    background-color: #0056b3;
+}
+
+/* 商品列表 */
+.product-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1em;
+    padding: 1em;
+}
+
+.product-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1em;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    width: 200px;
+    text-align: center;
+}
+
+.product-card button {
+    margin: 5px 2px;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    background-color: #28a745;
+    color: white;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.product-card button:hover {
+    background-color: #218838;
+}

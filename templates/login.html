@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>登入</h2>
+<form id="login-form">
+    <label>帳號：<input type="text" name="username" required></label><br>
+    <label>密碼：<input type="password" name="password" required></label><br>
+    <button type="submit">登入</button>
+</form>
+<p>還沒有帳號？<a href="/register">立即註冊</a></p>
+
+<script>
+document.getElementById("login-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const data = Object.fromEntries(new FormData(e.target).entries());
+    
+    const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+    });
+
+    const result = await res.json();
+    if(res.ok){
+        alert(result.message || "登入成功");
+        location.href = "/";
+    } else {
+        alert(result.message || "登入失敗");
+    }
+});
+</script>
+{% endblock %}
