@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>我的訂單</h2>
+
+{% if orders %}
+    <table border="1" cellpadding="5" cellspacing="0">
+        <thead>
+            <tr>
+                <th>訂單編號</th>
+                <th>商品</th>
+                <th>數量</th>
+                <th>單價</th>
+                <th>小計</th>
+                <th>總計</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+                <tr>
+                    <td>{{ order.order_id }}</td>
+                    <td>
+                        <ul>
+                        {% for product_id, item in order.products.items() %}
+                            <li>{{ item.name }}</li>
+                        {% endfor %}
+                        </ul>
+                    </td>
+                    <td>
+                        <ul>
+                        {% for product_id, item in order.products.items() %}
+                            <li>{{ item.quantity }}</li>
+                        {% endfor %}
+                        </ul>
+                    </td>
+                    <td>
+                        <ul>
+                        {% for product_id, item in order.products.items() %}
+                            <li>{{ item.price }}</li>
+                        {% endfor %}
+                        </ul>
+                    </td>
+                    <td>
+                        <ul>
+                        {% for product_id, item in order.products.items() %}
+                            <li>{{ item.price * item.quantity }}</li>
+                        {% endfor %}
+                        </ul>
+                    </td>
+                    <td>{{ order.total }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>你還沒有任何訂單。</p>
+{% endif %}
+
+{% endblock %}

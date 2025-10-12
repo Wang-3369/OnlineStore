@@ -73,7 +73,7 @@ from database.db import orders_collection  # 新增：訂單 collection
 @cart_bp.route("/api/cart/checkout", methods=["POST"])
 def checkout():
     cart = session.get("cart", {})
-    username = session.get("username")  # 從 session 取得登入使用者帳號
+    username = session.get("username")
 
     if not cart:
         return jsonify({"message": "購物車為空"}), 400
@@ -82,13 +82,13 @@ def checkout():
 
     # 計算總價
     total = sum(float(item["price"]) * int(item["quantity"]) for item in cart.values())
-    order_id = str(uuid.uuid4())[:8]  # 短訂單編號
+    order_id = str(uuid.uuid4())[:8]
 
-    # 存入 MongoDB orders collection
+    # 改名 items -> products
     order_data = {
         "order_id": order_id,
         "username": username,
-        "items": cart,
+        "products": cart,  # 改欄位名稱
         "total": total
     }
     orders_collection.insert_one(order_data)

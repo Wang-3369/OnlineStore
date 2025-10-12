@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const loginBtn = document.getElementById('login-btn');
     const logoutBtn = document.getElementById('logout-btn');
     const adminBtn = document.getElementById('admin-btn');
+    const orderBtn = document.getElementById('orders-btn');
 
     // 點擊圖示切換 popup
     icon.addEventListener('click', () => {
@@ -27,6 +28,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (adminBtn) {
         adminBtn.addEventListener('click', () => location.href = "/admin/user");
     }
+
+    if (orderBtn) {
+    orderBtn.addEventListener('click', () => location.href = "/orders");
+    }
+
 
     // 點擊空白處收起 popup
     document.addEventListener('click', (e) => {
