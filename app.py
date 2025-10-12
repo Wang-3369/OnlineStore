@@ -1,3 +1,4 @@
+import os
 from flask import Flask, render_template, session, redirect
 from api.product_api import product_bp
 from api.auth_api import auth_bp
@@ -6,7 +7,7 @@ from api.cart_api import cart_bp
 from database.db import products_collection  # 從 db.py 匯入 collection
 
 app = Flask(__name__)
-app.secret_key = "s01257032"
+app.secret_key = os.getenv("SECRET_KEY")
 
 # 載入 API
 app.register_blueprint(auth_bp)
