@@ -3,54 +3,36 @@
 <h2>我的訂單</h2>
 
 {% if orders %}
-    <table border="1" cellpadding="5" cellspacing="0">
-        <thead>
-            <tr>
-                <th>訂單編號</th>
-                <th>商品</th>
-                <th>數量</th>
-                <th>單價</th>
-                <th>小計</th>
-                <th>總計</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for order in orders %}
+    {% for order in orders %}
+        <h3>訂單編號：{{ order.order_id }}</h3>
+        <table border="1" cellpadding="5" cellspacing="0">
+            <thead>
                 <tr>
-                    <td>{{ order.order_id }}</td>
-                    <td>
-                        <ul>
-                        {% for product_id, item in order.products.items() %}
-                            <li>{{ item.name }}</li>
-                        {% endfor %}
-                        </ul>
-                    </td>
-                    <td>
-                        <ul>
-                        {% for product_id, item in order.products.items() %}
-                            <li>{{ item.quantity }}</li>
-                        {% endfor %}
-                        </ul>
-                    </td>
-                    <td>
-                        <ul>
-                        {% for product_id, item in order.products.items() %}
-                            <li>{{ item.price }}</li>
-                        {% endfor %}
-                        </ul>
-                    </td>
-                    <td>
-                        <ul>
-                        {% for product_id, item in order.products.items() %}
-                            <li>{{ item.price * item.quantity }}</li>
-                        {% endfor %}
-                        </ul>
-                    </td>
-                    <td>{{ order.total }}</td>
+                    <th>商品名稱</th>
+                    <th>數量</th>
+                    <th>單價</th>
+                    <th>小計</th>
                 </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                {% for product_id, item in order.products.items() %}
+                    <tr>
+                        <td>{{ item.name }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>{{ item.price }}</td>
+                        <td>{{ (item.price | float) * (item.quantity | float) }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="3" style="text-align: right;"><strong>總計：</strong></td>
+                    <td><strong>{{ order.total }}</strong></td>
+                </tr>
+            </tfoot>
+        </table>
+        <br>
+    {% endfor %}
 {% else %}
     <p>你還沒有任何訂單。</p>
 {% endif %}
