@@ -23,25 +23,29 @@ def index():
     products = []
     for p in products_collection.find():
         products.append({
-            "id": str(p["_id"]),  # 轉成字串
+            "id": str(p["_id"]),
             "name": p["name"],
             "price": p["price"]
         })
     return render_template("index.html", products=products)
 
+#登入頁面           
 @app.route("/login")
 def login_page():
     return render_template("login.html")
 
+#註冊頁面
 @app.route("/register")
 def register_page():
     return render_template("register.html")
 
+#登出
 @app.route("/logout")
 def logout_page():
     session.clear()
     return redirect("/")
 
+#訂單頁面
 @app.route("/orders")
 def orders_page():
     if not session.get("username"):
@@ -60,17 +64,19 @@ def orders_page():
 
 
 
-# 購物車頁面
+#購物車頁面
 @app.route("/cart")
 def cart_page():
     return render_template("cart.html")
 
+#商品修改頁面
 @app.route("/admin")
 def admin_page():
     if session.get("role") not in ["admin", "sub-admin"]:
         return redirect("/")
     return render_template("admin.html")
 
+#人員管理頁面
 @app.route("/admin/user")
 def admin_user_page():
     if session.get("role") != "admin":
