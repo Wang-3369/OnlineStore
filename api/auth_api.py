@@ -1,49 +1,100 @@
-from flask import Blueprint, request, jsonify, session
+import os
+from flask import Blueprint, request, jsonify, session, redirect, url_for
 from werkzeug.security import generate_password_hash, check_password_hash
 from database.db import users_collection
 from datetime import datetime
+from dotenv import load_dotenv
+from authlib.integrations.flask_client import OAuth
+
+load_dotenv()
 
 auth_bp = Blueprint("auth", __name__)
 
-# 註冊
+# === 帳號密碼登入功能 ===
 @auth_bp.route("/api/register", methods=["POST"])
 def register():
     data = request.json
-    username = data["username"]
-    password = data["password"]
+    username = data.get("username")
+    password = data.get("password")
 
-    # 檢查帳號是否存在
     if users_collection.find_one({"username": username}):
         return jsonify({"message": "帳號已存在"}), 400
 
     hashed_password = generate_password_hash(password)
-
     users_collection.insert_one({
         "username": username,
         "password": hashed_password,
-        "role": "user",  # 新註冊預設一般使用者
+        "role": "user",
         "created_at": datetime.utcnow()
     })
-
     return jsonify({"message": "註冊成功"})
 
-# 登入
 @auth_bp.route("/api/login", methods=["POST"])
 def login():
     data = request.json
-    username = data["username"]
-    password = data["password"]
+    username = data.get("username")
+    password = data.get("password")
 
     user = users_collection.find_one({"username": username})
-    if not user or not check_password_hash(user["password"], password):
+    if not user or not check_password_hash(user.get("password", ""), password):
         return jsonify({"message": "帳號或密碼錯誤"}), 401
 
     session["username"] = username
     session["role"] = user.get("role", "user")
     return jsonify({"message": "登入成功", "role": user.get("role", "user")})
 
-# 登出
 @auth_bp.route("/api/logout", methods=["POST"])
 def logout():
     session.clear()
     return jsonify({"message": "已登出"})
+
+
+# === Google 登入功能 (Authlib + OpenID Connect) ===
+oauth = OAuth()
+google = oauth.register(
+    name='google',
+    client_id=os.getenv("GOOGLE_CLIENT_ID"),
+    client_secret=os.getenv("GOOGLE_CLIENT_SECRET"),
+    server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
+    client_kwargs={'scope': 'openid email profile'},
+    # 加上 api_base_url 才能正確解析相對 URL
+    api_base_url='https://openidconnect.googleapis.com/v1/'
+)
+
+@auth_bp.record_once
+def register_oauth(state):
+    oauth.init_app(state.app)
+
+# Google 登入入口
+@auth_bp.route("/login/google")
+def login_google():
+    redirect_uri = url_for('auth.google_callback', _external=True)
+    return google.authorize_redirect(redirect_uri)
+
+# Google 登入回調
+@auth_bp.route("/login/callback")
+def google_callback():
+    token = google.authorize_access_token()
+    # 這裡使用完整 api_base_url + relative path
+    resp = google.get('userinfo', token=token)
+    user_info = resp.json()
+
+    email = user_info.get("email")
+    name = user_info.get("name")
+
+    # 若使用者不存在就建立帳號
+    user = users_collection.find_one({"username": email})
+    if not user:
+        users_collection.insert_one({
+            "username": email,
+            "password": None,
+            "role": "user",
+            "name": name,
+            "created_at": datetime.utcnow()
+        })
+
+    session["username"] = email
+    session["role"] = "user"
+    session["google_login"] = True
+
+    return redirect("/")
