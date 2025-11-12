@@ -1,5 +1,6 @@
 from flask import Blueprint, session, request, jsonify
 from database.db import products_collection  # 商品 collection
+from database.db import users_collection     # 帳號 collection
 from bson.objectid import ObjectId
 import uuid
 
@@ -72,6 +73,11 @@ from database.db import orders_collection  # 新增：訂單 collection
 # 結帳，產生訂單編號並存入 MongoDB
 @cart_bp.route("/api/cart/checkout", methods=["POST"])
 def checkout():
+
+    # 取得 socketio
+    from flask import current_app
+    socketio = current_app.extensions.get('socketio')
+
     cart = session.get("cart", {})
     username = session.get("username")
 
@@ -95,6 +101,21 @@ def checkout():
 
     # 清空購物車
     session.pop("cart")
+
+    # ===== 通知管理者 =====
+    admins = users_collection.find({"role": {"$in": ["admin", "sub-admin"]}})
+    for admin in admins:
+        # 假設用 SocketIO room 存管理者 _id
+        socketio.emit("new_order", {
+            "order_id": order_id,
+            "username": username,
+            "products": cart,
+            "total": total
+        }, 
+        room=str(admin["username"]),
+        namespace='/admin'
+        )
+        print("send new_order to "+admin["username"]) 
 
     return jsonify({
         "message": f"結帳成功！訂單編號：{order_id}",

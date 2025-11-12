@@ -54,4 +54,26 @@ document.getElementById("add-form").addEventListener("submit", async (e) => {
     fetchProducts();
 });
 
+document.addEventListener("DOMContentLoaded", () => {
+    // ===== Socket.IO 新訂單通知 =====
+    const socket = io('http://localhost:5000/admin'); // admin namespace
+
+    // 進入自己的 room
+    socket.on('connect', () => {
+    if(adminId) {
+        socket.emit('join_room', { room: adminId });
+        console.log("已加入自己的 room:", adminId);
+    }
+    });
+
+    // 收到新訂單通知
+    socket.on("new_order", (data) => {
+        console.log("收到新訂單通知", data);
+        const ul = document.getElementById("order-notifications");
+        const li = document.createElement("li");
+        li.textContent = `新訂單：編號 ${data.order_id}，使用者 ${data.username}，總價 ${data.total}`;
+        ul.prepend(li); // 最新通知放最前面
+        alert(`新訂單通知！編號: ${data.order_id}`);
+    });
+});
 fetchProducts();
