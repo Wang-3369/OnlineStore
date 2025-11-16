@@ -1,5 +1,6 @@
 import os
 from flask import Flask, render_template, session, redirect
+from flask_socketio import SocketIO, join_room
 from api.product_api import product_bp
 from api.auth_api import auth_bp
 from api.admin_api import admin_bp
@@ -7,9 +8,29 @@ from api.orders_api import orders_bp
 from api.cart_api import cart_bp
 from database.db import products_collection  # 從 db.py 匯入 collection
 from dotenv import load_dotenv
+import eventlet
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "mydefaultsecret")
+
+# 初始化 SocketIO
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="eventlet")
+
+# admin namespace connect 事件
+@socketio.on('connect', namespace='/admin')
+def on_connect():
+    print("Admin connected")
+
+@socketio.on('disconnect', namespace='/admin')
+def on_disconnect():
+    print("Admin disconnected")
+
+# ===== 處理前端 join_room =====
+@socketio.on('join_room', namespace='/admin')
+def handle_join(data):
+    room = data['room']
+    join_room(room)
+    print(f"{room} 加入自己的 room")
 
 # 載入 API
 app.register_blueprint(auth_bp)
@@ -87,4 +108,4 @@ def admin_user_page():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    socketio.run(app, debug=True)

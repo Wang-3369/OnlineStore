@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify, session
 from database.db import users_collection
+from database.db import orders_collection
 from bson.objectid import ObjectId
 
 admin_bp = Blueprint("admin", __name__)
@@ -73,3 +74,45 @@ def delete_user():
 
     users_collection.delete_one({"_id": ObjectId(user_id)})
     return jsonify({"message": f"使用者 {user['username']} 已被刪除"})
+
+
+#管理者接受訂單
+@admin_bp.route("/api/admin/order/accept/<order_id>", methods=["POST"])
+def accept_order(order_id):
+    order = orders_collection.find_one({"order_id": order_id})
+    if not order:
+        return jsonify({"error": "Order not found"}), 404
+
+    orders_collection.update_one(
+        {"order_id": order_id},
+        {"$set": {"status": "accepted"}}
+    )
+
+    updated_order = orders_collection.find_one({"order_id": order_id})
+    updated_order["_id"] = str(updated_order["_id"])  # 轉字串給前端
+
+    return jsonify({
+        "order": updated_order
+    })
+
+
+#管理者完成訂單
+@admin_bp.route("/api/admin/order/complete/<order_id>", methods=["POST"])
+def complete_order(order_id):
+    order = orders_collection.find_one({"order_id": order_id})
+    if not order:
+        return jsonify({"error": "Order not found"}), 404
+
+    # 修改狀態
+    orders_collection.update_one(
+        {"order_id": order_id},
+        {"$set": {"status": "completed"}}
+    )
+
+    # 取更新後資料（給前端用）
+    updated = orders_collection.find_one({"order_id": order_id})
+    updated["_id"] = str(updated["_id"])
+    return jsonify({
+        "order": updated,
+        "message": "Order completed"
+    })
