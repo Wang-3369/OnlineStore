@@ -68,12 +68,73 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 收到新訂單通知
     socket.on("new_order", (data) => {
-        console.log("收到新訂單通知", data);
-        const ul = document.getElementById("order-notifications");
-        const li = document.createElement("li");
-        li.textContent = `新訂單：編號 ${data.order_id}，使用者 ${data.username}，總價 ${data.total}`;
-        ul.prepend(li); // 最新通知放最前面
-        alert(`新訂單通知！編號: ${data.order_id}`);
+    const modal = document.getElementById("orderModal");
+    const detailBox = document.getElementById("orderDetails");
+
+    let html = `
+        <p><strong>訂單編號：</strong> ${data.order_id}</p>
+        <p><strong>使用者：</strong> ${data.username}</p>
+        <p><strong>總金額：</strong> ${data.total}</p>
+        <p><strong>品項：</strong></p>
+        <ul>
+    `;
+
+    for (let item of data.products) {
+        html += `<li>${item.name} x ${item.quantity}（$${item.price}）</li>`;
+    }
+
+    html += "</ul>";
+
+    detailBox.innerHTML = html;
+    modal.style.display = "flex";   // 打開 modal
+
+    // 接受
+    document.getElementById("acceptOrder").onclick = () => {
+        socket.emit("order_response", {
+            order_id: data.order_id,
+            decision: "accepted"
+        });
+        addMakingOrder(data);//接受就進入製作
+        modal.style.display = "none";
+    };
+
+    // 拒絕
+    document.getElementById("rejectOrder").onclick = () => {
+        socket.emit("order_response", {
+            order_id: data.order_id,
+            decision: "rejected"
+        });
+        modal.style.display = "none";
+    };
+
     });
+    
+    //製作中訂單
+    function addMakingOrder(data) {
+    const list = document.getElementById("making-list");
+    if (!list) return;
+
+    const div = document.createElement("div");
+    div.className = "making-item";
+    div.dataset.id = data.order_id;
+
+    let html = `<h3>訂單 #${data.order_id}</h3><ul>`;
+    for (let key in data.products) {
+        const item = data.products[key];
+        html += `<li>${item.name} x ${item.quantity}</li>`;
+    }
+    html += `</ul>
+        <button class="finish-btn">完成</button>
+        <button class="edit-btn">修改</button>
+        <hr>
+    `;
+
+    div.innerHTML = html;
+    list.appendChild(div);
+
+    // 功能按鈕
+    div.querySelector(".finish-btn").onclick = () => finishOrder(data.order_id, div);
+    div.querySelector(".edit-btn").onclick = () => editOrder(data.order_id, div, data.products);
+}
 });
 fetchProducts();

@@ -104,12 +104,19 @@ def checkout():
 
     # ===== 通知管理者 =====
     admins = users_collection.find({"role": {"$in": ["admin", "sub-admin"]}})
+    product_list = []
+    for pid, item in cart.items():
+        product_list.append({
+            "name": item["name"],
+            "price": item["price"],
+            "quantity": item["quantity"]
+        })
     for admin in admins:
         # 假設用 SocketIO room 存管理者 _id
         socketio.emit("new_order", {
             "order_id": order_id,
             "username": username,
-            "products": cart,
+            "products": product_list,
             "total": total
         }, 
         room=str(admin["username"]),
