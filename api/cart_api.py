@@ -95,7 +95,8 @@ def checkout():
         "order_id": order_id,
         "username": username,
         "products": cart,  # 改欄位名稱
-        "total": total
+        "total": total,
+        "status": "pending", #待處理
     }
     orders_collection.insert_one(order_data)
 

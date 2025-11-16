@@ -90,12 +90,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 接受
     document.getElementById("acceptOrder").onclick = () => {
-        socket.emit("order_response", {
-            order_id: data.order_id,
-            decision: "accepted"
+        fetch(`/api/admin/order/accept/${data.order_id}`, {
+        method: "POST"
+        })
+        .then(res => res.json())
+        .then(resData => {
+
+            if (resData.error) {
+                alert("接受訂單失敗：" + resData.error);
+                return;
+            }
+
+            addMakingOrder(resData.order); // 加入製作清單
+            modal.style.display = "none";
+        })
+        .catch(err => {
+            console.error("API 錯誤:", err);
+            alert("接受訂單時發生錯誤，請查看 console");
         });
-        addMakingOrder(data);//接受就進入製作
-        modal.style.display = "none";
     };
 
     // 拒絕
@@ -124,17 +136,37 @@ document.addEventListener("DOMContentLoaded", () => {
         html += `<li>${item.name} x ${item.quantity}</li>`;
     }
     html += `</ul>
-        <button class="finish-btn">完成</button>
-        <button class="edit-btn">修改</button>
-        <hr>
-    `;
+            <button class="finish-btn">完成</button>
+            <hr>
+        `;
 
     div.innerHTML = html;
     list.appendChild(div);
 
     // 功能按鈕
-    div.querySelector(".finish-btn").onclick = () => finishOrder(data.order_id, div);
-    div.querySelector(".edit-btn").onclick = () => editOrder(data.order_id, div, data.products);
+    div.querySelector(".finish-btn").onclick = () => completeOrder(data.order_id, div);
 }
 });
+
+async function completeOrder(orderId) {
+    if (!confirm("確定要將訂單設為完成？")) return;
+
+    const res = await fetch(`/api/admin/order/complete/${orderId}`, {
+        method: "POST"
+    });
+    const data = await res.json();
+
+    if (data.error) {
+        alert(data.error);
+        return;
+    }
+
+    alert(data.message || "訂單已完成");
+
+    // === 從畫面上移除 ===
+    const elem = document.querySelector(`.making-item[data-id="${orderId}"]`);
+    if (elem) {
+        elem.remove();
+    }
+}
 fetchProducts();

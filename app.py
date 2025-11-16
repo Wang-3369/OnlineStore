@@ -16,37 +16,6 @@ app.secret_key = os.getenv("SECRET_KEY", "mydefaultsecret")
 # 初始化 SocketIO
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode="eventlet")
 
-
-#管理者對訂單接受與否
-@socketio.on("order_response")
-def handle_order_response(data):
-    order_id = data["order_id"]
-    decision = data["decision"]
-    print("管理者回覆：", order_id, decision)
-
-
-#管理者接受訂單
-@admin_bp.route("/api/admin/order/accept/<order_id>", methods=["POST"])
-def accept_order(order_id):
-
-    order = orders_collection.find_one({"_id": ObjectId(order_id)})
-    if not order:
-        return jsonify({"success": False}), 404
-
-    # 設為製作中
-    orders_collection.update_one(
-        {"_id": ObjectId(order_id)},
-        {"$set": {"status": "making"}}
-    )
-
-    # Socket 廣播給所有管理者
-    socketio.emit("order_accepted", {
-        "order_id": order_id,
-        "products": order["products"]
-    }, namespace="/admin")
-
-    return jsonify({"success": True})
-
 # admin namespace connect 事件
 @socketio.on('connect', namespace='/admin')
 def on_connect():
