@@ -5,6 +5,7 @@ from api.auth_api import auth_bp
 from api.admin_api import admin_bp
 from api.orders_api import orders_bp
 from api.cart_api import cart_bp
+from api.profile_api import profile_bp
 from database.db import products_collection  # 從 db.py 匯入 collection
 from dotenv import load_dotenv
 
@@ -17,6 +18,7 @@ app.register_blueprint(product_bp)
 app.register_blueprint(admin_bp)
 app.register_blueprint(cart_bp)
 app.register_blueprint(orders_bp)
+app.register_blueprint(profile_bp)
 
 @app.route('/')
 def index():
@@ -85,6 +87,16 @@ def admin_user_page():
     users = list(users_collection.find())
     return render_template("admin_users.html", users=users)
 
+# 使用者自我管理頁面
+@app.route("/profile")
+def profile_page():
+    if not session.get("username"):
+        return redirect("/login")
+    
+    from database.db import users_collection
+    user = users_collection.find_one({"username": session["username"]})
+    
+    return render_template("profile.html", user=user)
 
 if __name__ == '__main__':
     app.run(debug=True)

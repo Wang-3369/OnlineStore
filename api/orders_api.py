@@ -14,6 +14,9 @@ def get_orders():
     orders = []
     for order in orders_cursor:
         order["_id"] = str(order["_id"])
+        # 將 created_at 轉成 ISO 字串，避免前端直接顯示 MongoDB datetime 物件
+        if "created_at" in order:
+            order["created_at"] = order["created_at"].isoformat()
         orders.append(order)
 
     return jsonify({"orders": orders})

@@ -75,12 +75,12 @@ def login_google():
 @auth_bp.route("/login/callback")
 def google_callback():
     token = google.authorize_access_token()
-    # 這裡使用完整 api_base_url + relative path
     resp = google.get('userinfo', token=token)
     user_info = resp.json()
 
     email = user_info.get("email")
     name = user_info.get("name")
+    avatar = user_info.get("picture")  # <- Google 大頭貼 URL
 
     # 若使用者不存在就建立帳號
     user = users_collection.find_one({"username": email})
@@ -90,11 +90,19 @@ def google_callback():
             "password": None,
             "role": "user",
             "name": name,
+            "avatar": avatar,           # <- 存到資料庫
             "created_at": datetime.utcnow()
         })
+    else:
+        # 若已有使用者，更新 avatar
+        users_collection.update_one(
+            {"username": email},
+            {"$set": {"avatar": avatar}}
+        )
 
     session["username"] = email
     session["role"] = "user"
+    session["avatar"] = avatar           # <- 存到 session，前端可用
     session["google_login"] = True
 
     return redirect("/")

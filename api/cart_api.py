@@ -1,6 +1,7 @@
 from flask import Blueprint, session, request, jsonify
 from database.db import products_collection  # 商品 collection
 from bson.objectid import ObjectId
+from datetime import datetime
 import uuid
 
 cart_bp = Blueprint("cart", __name__)
@@ -80,25 +81,46 @@ def checkout():
     if not username:
         return jsonify({"message": "尚未登入"}), 403
 
-    # 計算總價
+    # === 1. 結帳前先檢查庫存 ===
+    for product_id, item in cart.items():
+        product = products_collection.find_one({"_id": ObjectId(product_id)})
+        if not product:
+            return jsonify({"message": f"商品 {item['name']} 不存在"}), 400
+
+        if product["stock"] < item["quantity"]:
+            return jsonify({
+                "message": f"商品「{item['name']}」庫存不足",
+                "stock": product["stock"],
+                "need": item["quantity"]
+            }), 400
+
+    # === 2. 庫存足夠 → 逐筆扣庫存 ===
+    for product_id, item in cart.items():
+        products_collection.update_one(
+            {"_id": ObjectId(product_id)},
+            {"$inc": {"stock": -item["quantity"]}}
+        )
+
+    # === 3. 計算總價 + 產生訂單 ===
     total = sum(float(item["price"]) * int(item["quantity"]) for item in cart.values())
     order_id = str(uuid.uuid4())[:8]
 
-    # 改名 items -> products
     order_data = {
         "order_id": order_id,
         "username": username,
-        "products": cart,  # 改欄位名稱
-        "total": total
+        "products": cart,
+        "total": total,
+        "created_at": datetime.utcnow()  # <- 新增訂單建立時間
     }
     orders_collection.insert_one(order_data)
 
-    # 清空購物車
+    # === 4. 清空購物車 ===
     session.pop("cart")
 
     return jsonify({
         "message": f"結帳成功！訂單編號：{order_id}",
         "order_id": order_id,
-        "total": total
+        "total": total,
+        "created_at": order_data["created_at"].isoformat()  # 回傳 ISO 字串
     })
-
+    
