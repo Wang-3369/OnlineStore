@@ -1,7 +1,7 @@
 from flask import Blueprint, session, request, jsonify
 from database.db import products_collection  # 商品 collection
 from bson.objectid import ObjectId
-from datetime import datetime
+from datetime import datetime, timezone
 import uuid
 
 cart_bp = Blueprint("cart", __name__)
@@ -110,7 +110,7 @@ def checkout():
         "username": username,
         "products": cart,
         "total": total,
-        "created_at": datetime.utcnow()  # <- 新增訂單建立時間
+        "created_at": datetime.now(timezone.utc)  # <- 新增訂單建立時間
     }
     orders_collection.insert_one(order_data)
 

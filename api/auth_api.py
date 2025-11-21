@@ -39,8 +39,12 @@ def login():
     if not user or not check_password_hash(user.get("password", ""), password):
         return jsonify({"message": "帳號或密碼錯誤"}), 401
 
+     # 設定 session
     session["username"] = username
     session["role"] = user.get("role", "user")
+    session["avatar"] = user.get("avatar")  # 自訂頭像
+    session["google_avatar"] = user.get("google_avatar")  # Google登入帳號可能沒有
+
     return jsonify({"message": "登入成功", "role": user.get("role", "user")})
 
 @auth_bp.route("/api/logout", methods=["POST"])
@@ -80,29 +84,33 @@ def google_callback():
 
     email = user_info.get("email")
     name = user_info.get("name")
-    avatar = user_info.get("picture")  # <- Google 大頭貼 URL
+    google_avatar = user_info.get("picture")
 
-    # 若使用者不存在就建立帳號
     user = users_collection.find_one({"username": email})
     if not user:
-        users_collection.insert_one({
+        user_id = users_collection.insert_one({
             "username": email,
             "password": None,
             "role": "user",
             "name": name,
-            "avatar": avatar,           # <- 存到資料庫
+            "avatar": None,
+            "google_avatar": google_avatar,
             "created_at": datetime.utcnow()
-        })
+        }).inserted_id
+        user = users_collection.find_one({"_id": user_id})
     else:
-        # 若已有使用者，更新 avatar
         users_collection.update_one(
             {"username": email},
-            {"$set": {"avatar": avatar}}
+            {"$set": {"google_avatar": google_avatar}}
         )
+        user = users_collection.find_one({"username": email})
 
+    # 設定 session
     session["username"] = email
     session["role"] = "user"
-    session["avatar"] = avatar           # <- 存到 session，前端可用
-    session["google_login"] = True
+    session["avatar"] = user.get("avatar")  # 自訂頭像優先
+    session["google_avatar"] = user.get("google_avatar")  # Google頭像
 
     return redirect("/")
+
+

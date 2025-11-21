@@ -1,17 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
 <h2>商品列表</h2>
-<div class="product-list">
-    {% for p in products %}
-    <div class="product-card">
-        <h3>{{ p.name }}</h3>
-        <p>NT$ {{ p.price }}</p>
-        <label>數量：
-            <input type="number" value="1" min="1" id="qty-{{ p.id }}">
-        </label>
-        <button class="add-cart-btn" data-id="{{ p.id }}">加入購物車</button>
-    </div>
-    {% endfor %}
+<div class="product-list" id="product-list">
+    <!-- 商品列表將由 JS 動態生成 -->
 </div>
 
 <script defer src="{{ url_for('static', filename='js/cartadd.js') }}"></script>

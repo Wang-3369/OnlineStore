@@ -2,42 +2,60 @@
 {% block content %}
 <h2>我的訂單</h2>
 
-{% if orders %}
-    {% for order in orders %}
-        <h3>訂單編號：{{ order.order_id }}</h3>
-        {% if order.created_at %}
-            <p>下單時間：{{ order.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
-        {% endif %}
-        <table border="1" cellpadding="5" cellspacing="0">
-            <thead>
-                <tr>
-                    <th>商品名稱</th>
-                    <th>數量</th>
-                    <th>單價</th>
-                    <th>小計</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for product_id, item in order.products.items() %}
-                    <tr>
-                        <td>{{ item.name }}</td>
-                        <td>{{ item.quantity }}</td>
-                        <td>{{ "%.2f"|format(item.price|float) }}</td>
-                        <td>{{ "%.2f"|format((item.price|float) * (item.quantity|float)) }}</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-            <tfoot>
-                <tr>
-                    <td colspan="3" style="text-align: right;"><strong>總計：</strong></td>
-                    <td><strong>{{ "%.2f"|format(order.total|float) }}</strong></td>
-                </tr>
-            </tfoot>
-        </table>
-        <br>
-    {% endfor %}
-{% else %}
-    <p>你還沒有任何訂單。</p>
-{% endif %}
+<label for="timezone-select">選擇時間格式：</label>
+<select id="timezone-select">
+    <option value="UTC+8">台北時間 (UTC+8)</option>
+    <option value="UTC+0">UTC</option>
+    <option value="UTC+1">UTC+1</option>
+    <option value="UTC+2">UTC+2</option>
+    <option value="UTC+3">UTC+3</option>
+    <option value="UTC+4">UTC+4</option>
+    <option value="UTC+5">UTC+5</option>
+    <option value="UTC+6">UTC+6</option>
+    <option value="UTC+7">UTC+7</option>
+    <option value="UTC+9">UTC+9</option>
+    <option value="UTC+10">UTC+10</option>
+</select>
 
+<div id="orders-container">
+    {% if orders %}
+        {% for order in orders %}
+            <div class="order-block" data-created-at="{{ order.created_at.isoformat() }}">
+                <h3>訂單編號：{{ order.order_id }}</h3>
+                <p class="order-time">下單時間：<span></span></p>
+                <table border="1" cellpadding="5" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>商品名稱</th>
+                            <th>數量</th>
+                            <th>單價</th>
+                            <th>小計</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product_id, item in order.products.items() %}
+                            <tr>
+                                <td>{{ item.name }}</td>
+                                <td>{{ item.quantity }}</td>
+                                <td>{{ "%.2f"|format(item.price|float) }}</td>
+                                <td>{{ "%.2f"|format((item.price|float) * (item.quantity|float)) }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="3" style="text-align: right;"><strong>總計：</strong></td>
+                            <td><strong>{{ "%.2f"|format(order.total|float) }}</strong></td>
+                        </tr>
+                    </tfoot>
+                </table>
+                <br>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>你還沒有任何訂單。</p>
+    {% endif %}
+</div>
+
+<script defer src="{{ url_for('static', filename='js/orders.js') }}"></script>
 {% endblock %}

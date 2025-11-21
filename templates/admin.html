@@ -5,11 +5,13 @@
 <div id="product-list"></div>
 
 <h3>新增商品</h3>
-<form id="add-form">
+<form id="add-form" enctype="multipart/form-data">
     <input type="text" name="name" placeholder="商品名稱" required>
     <input type="number" name="price" placeholder="價格" min="0" step="0.01" required>
     <input type="number" name="stock" placeholder="庫存" min="0" step="1" required>
+    <input type="file" name="image" accept="image/*">
     <button type="submit">新增</button>
 </form>
+
 <script defer src="{{ url_for('static', filename='js/admin.js') }}"></script>
 {% endblock %}
