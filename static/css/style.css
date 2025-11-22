@@ -1,16 +1,17 @@
 /* 全局樣式 */
 body {
-    font-family: "Noto Sans TC", sans-serif;
+    font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
     margin: 0;
     padding: 0;
-    background: #fafafa;
+    background: #f5f5f5;
+    color: #1c1b1b;
 }
 
 /* Header */
 header {
-    background: #222;
-    color: white;
-    padding: 1em;
+    background: #1a1a1a;
+    color: #fff;
+    padding: 1em 2em;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -18,100 +19,154 @@ header {
 }
 
 nav a {
-    color: white;
-    margin-left: 1em;
+    color: #fff;
+    margin-left: 1.2em;
     text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
 }
 
 nav a:hover {
+    color: #ffd700;
     text-decoration: underline;
+}
+
+/* 使用者容器 */
+#user-container {
+    position: relative;
+    display: flex;
+    align-items: center;
 }
 
 /* 使用者圖示 */
 #user-icon {
     width: 40px;
+    height: 40px;
+    border-radius: 50%;
     cursor: pointer;
-    transition: transform 0.2s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 #user-icon:hover {
     transform: scale(1.1);
+    box-shadow: 0 0 8px rgba(0,0,0,0.3);
 }
 
-/* 使用者 popup */
-#user-popup {
-    display: none;
-    position: absolute;
-    top: 60px;
-    right: 10px;
-    background: #fff;
-    border: 1px solid #ccc;
-    padding: 15px;
-    text-align: center;
-    z-index: 100;
-    width: 180px;
-    border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+/* 滑出選單 - 全寬覆蓋 */
+#user-slide-menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: auto;
+    background: rgba(186, 204, 223, 0.9); /* 半透明藍色，最後一個參數 alpha 控制透明度 0~1 */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2); /* 可加淡淡陰影增加層次 */
+    padding: 2em;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 15px;
+    transform: translateY(-100%);
     opacity: 0;
-    transform: translateY(-10px);
-    transition: opacity 0.3s ease, transform 0.3s ease;
+    pointer-events: none;
+    transition: transform 0.3s ease, opacity 0.3s ease, background 0.3s ease;
+    z-index: 9999;
 }
 
-#user-popup.show {
-    display: block;
-    opacity: 1;
+/* 展示時 */
+#user-slide-menu.show {
     transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
 }
 
-#user-popup p {
-    margin: 10px 0;
-    font-weight: bold;
-    color: #333;
+/* 選單內按鈕/文字 */
+#user-slide-menu p,
+#user-slide-menu button {
+    width: 80%;
+    margin: 0 auto;        /* 水平置中 */
 }
 
-#user-popup button {
-    margin: 5px;
-    padding: 5px 10px;
+/* 按鈕顏色調整 */
+#user-slide-menu button {
+    padding: 6px 12px;
+    border-radius: 6px;
     border: none;
-    border-radius: 4px;
-    background-color: #007bff;
-    color: white;
+    background-color: rgba(255, 255, 255, 0.9); /* 半透明白色按鈕 */
+    color: #de4c4e; /* 按鈕文字顏色 */
     cursor: pointer;
-    transition: background 0.2s ease;
+    transition: background 0.2s ease, transform 0.15s ease;
 }
 
-#user-popup button:hover {
-    background-color: #0056b3;
+#user-slide-menu button:hover {
+    background-color: rgb(186, 183, 183); /* 滑鼠移上完全不透明 */
+    transform: translateY(-1px);
 }
+
+/* 使用者名稱文字顏色 */
+#user-slide-menu #username {
+    color: #000; /* 黑色 */
+    font-weight: bold; /* 可選，加粗效果 */
+}
+
 
 /* 商品列表 */
 .product-list {
     display: flex;
     flex-wrap: wrap;
-    gap: 1em;
-    padding: 1em;
+    gap: 1.2em;
+    padding: 2em;
+    justify-content: center;
 }
 
 .product-card {
-    background: white;
-    border-radius: 8px;
-    padding: 1em;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    width: 200px;
+    background: #fff;
+    border-radius: 12px;
+    padding: 1.2em;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    width: 220px;
     text-align: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
 }
 
 .product-card button {
-    margin: 5px 2px;
-    padding: 5px 10px;
-    border: none;
-    border-radius: 4px;
+    margin: 6px 3px;
+    padding: 6px 14px;
+    border-radius: 6px;
     background-color: #28a745;
+    border: none;
     color: white;
     cursor: pointer;
-    transition: background 0.2s ease;
+    transition: background 0.2s ease, transform 0.15s ease;
 }
 
 .product-card button:hover {
     background-color: #218838;
+    transform: translateY(-1px);
 }
+
+/* 商品卡按鈕點擊效果 */
+.product-card button:active {
+    transform: translateY(1px) scale(0.97); /* 縮小並往下微位移 */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* 加上輕微陰影 */
+}
+
+/* 滑出選單按鈕點擊效果 */
+#user-slide-menu button:active {
+    transform: translateY(0) scale(0.97); /* 縮小，保持按鈕不往上 */
+    background-color: rgba(220, 220, 220, 1); /* 更深的灰色回饋 */
+}
+
+/* 導航連結點擊效果 */
+nav a:active {
+    transform: scale(0.8);        /* 縮小 5% */
+    color: #ffa500;                /* 點擊時稍微變色，增加回饋 */
+    transition: transform 0.1s ease, color 0.1s ease;
+}
+

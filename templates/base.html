@@ -8,11 +8,12 @@
 <body>
     <header>
         <h1>北寧路早餐店</h1>
+        
         <nav>
             <a href="/">首頁</a>
             <a href="/cart">購物車</a>
             {% if session.get("username") %}
-                {% if session.get("role") in ["admin", "sub-admin"]%}
+                {% if session.get("role") in ["admin", "sub-admin"] %}
                     <a href="/admin">商品管理</a>
                     <a href="/admin/orders">接單系統</a>
                     <a href="/admin/user">人員管理</a>
@@ -24,29 +25,27 @@
             {% endif %}
         </nav>
 
-        <!-- 使用者圖示 -->
-        <img id="user-icon" 
-            src="{% if session.get('avatar') %}/api/profile/avatar/{{ session.get('avatar') }}{% else %}{{ session.get('google_avatar') or url_for('static', filename='images/user.png') }}{% endif %}" 
-            style="width:40px;cursor:pointer;position:absolute;top:10px;right:10px;">
-
-
-        <!-- 使用者 popup -->
-        <div id="user-popup">
-            {% if session.get("username") %}
-                <p id="username">使用者：{{ session.get("username") }}</p>
-
-                <button id="orders-btn">查看訂單</button>
-
-                <button id="profile-btn">使用者介面</button>
-
-                <button id="logout-btn">登出</button>
-            {% else %}
-                <p id="user-status">未登入</p>
-                <button id="login-btn">登入</button>
-            {% endif %}
+        <!-- 使用者圖示 + 滑出選單容器 -->
+        <div id="user-container">
+            <img 
+                id="user-icon" 
+                src="{% if session.get('avatar') %}/api/profile/avatar/{{ session.get('avatar') }}{% else %}{{ session.get('google_avatar') or url_for('static', filename='images/user.png') }}{% endif %}" 
+                alt="使用者圖示"
+            >
+            
+            <div id="user-slide-menu">
+                {% if session.get("username") %}
+                    <p id="username">使用者：{{ session.get("username") }}</p>
+                    <button id="orders-btn">查看訂單</button>
+                    <button id="profile-btn">使用者介面</button>
+                    <button id="logout-btn">登出</button>
+                {% else %}
+                    <p id="user-status">未登入</p>
+                    <button id="login-btn">登入</button>
+                {% endif %}
+            </div>
         </div>
 
-        </div>
     </header>
 
     <main>

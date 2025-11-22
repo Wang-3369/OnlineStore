@@ -1,16 +1,26 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const icon = document.getElementById('user-icon');
-    const popup = document.getElementById('user-popup');
+    const userContainer = document.getElementById('user-container');
+    const userIcon = document.getElementById('user-icon');
+    const userMenu = document.getElementById('user-slide-menu');
     const loginBtn = document.getElementById('login-btn');
     const logoutBtn = document.getElementById('logout-btn');
     const adminBtn = document.getElementById('admin-btn');
     const orderBtn = document.getElementById('orders-btn');
     const profileBtn = document.getElementById('profile-btn');
 
-    // 點擊圖示切換 popup
-    icon.addEventListener('click', () => {
-        popup.classList.toggle('show');
+    // 點擊圖示切換選單
+    userIcon.addEventListener('click', (e) => {
+        userMenu.classList.toggle('show');
+        e.stopPropagation(); // 阻止冒泡，避免 document click 立即收起
     });
+
+    // 點選外部關閉
+    document.addEventListener('click', (e) => {
+        if (!userMenu.contains(e.target) && e.target !== userIcon) {
+            userMenu.classList.remove('show');
+        }
+    });
+
 
     // 點擊登入
     if (loginBtn) {
@@ -31,17 +41,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (orderBtn) {
-    orderBtn.addEventListener('click', () => location.href = "/orders");
+        orderBtn.addEventListener('click', () => location.href = "/orders");
     }
 
     if (profileBtn) {
-    profileBtn.addEventListener('click', () => location.href = "/profile");
+        profileBtn.addEventListener('click', () => location.href = "/profile");
     }
-
-    // 點擊空白處收起 popup
-    document.addEventListener('click', (e) => {
-        if (!popup.contains(e.target) && e.target !== icon) {
-            popup.classList.remove('show');
-        }
-    });
 });
