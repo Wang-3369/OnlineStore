@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify, session
-from database.db import users_collection
+from database.db import users_collection, orders_collection
 from bson.objectid import ObjectId
 
 admin_bp = Blueprint("admin", __name__)
@@ -73,3 +73,39 @@ def delete_user():
 
     users_collection.delete_one({"_id": ObjectId(user_id)})
     return jsonify({"message": f"使用者 {user['username']} 已被刪除"})
+
+# 訂單API部分
+
+# 取得所有訂單
+@admin_bp.route("/api/admin/orders", methods=["GET"])
+@admin_required
+def get_all_orders():
+    orders_cursor = orders_collection.find().sort("created_at", -1)
+    orders = []
+    for order in orders_cursor:
+        order["_id"] = str(order["_id"])
+        if "created_at" in order:
+            order["created_at"] = order["created_at"].isoformat()
+        orders.append(order)
+    return jsonify(orders)
+
+# 修改訂單狀態 (接受/拒絕/完成)
+@admin_bp.route("/api/admin/order/status", methods=["POST"])
+@admin_required
+def update_order_status():
+    data = request.json
+    order_id = data.get("order_id")
+    new_status = data.get("status")
+
+    if not order_id or not new_status:
+        return jsonify({"message": "參數錯誤"}), 400
+
+    result = orders_collection.update_one(
+        {"order_id": order_id},
+        {"$set": {"status": new_status}}
+    )
+    
+    if result.modified_count > 0:
+        return jsonify({"message": f"訂單狀態已更新為 {new_status}"})
+    else:
+        return jsonify({"message": "訂單狀態更新失敗"}), 400

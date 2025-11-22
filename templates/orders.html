@@ -2,27 +2,25 @@
 {% block content %}
 <h2>我的訂單</h2>
 
-<label for="timezone-select">選擇時間格式：</label>
-<select id="timezone-select">
-    <option value="UTC+8">台北時間 (UTC+8)</option>
-    <option value="UTC+0">UTC</option>
-    <option value="UTC+1">UTC+1</option>
-    <option value="UTC+2">UTC+2</option>
-    <option value="UTC+3">UTC+3</option>
-    <option value="UTC+4">UTC+4</option>
-    <option value="UTC+5">UTC+5</option>
-    <option value="UTC+6">UTC+6</option>
-    <option value="UTC+7">UTC+7</option>
-    <option value="UTC+9">UTC+9</option>
-    <option value="UTC+10">UTC+10</option>
-</select>
-
 <div id="orders-container">
     {% if orders %}
         {% for order in orders %}
             <div class="order-block" data-created-at="{{ order.created_at.isoformat() }}">
                 <h3>訂單編號：{{ order.order_id }}</h3>
-                <p class="order-time">下單時間：<span></span></p>
+                <p>狀態：
+                    {% if order.status == 'pending' %}
+                        <span style="color:orange;">⏳ 等待老闆確認中</span>
+                    {% elif order.status == 'accepted' %}
+                        <span style="color:blue;">👨‍🍳 老闆已接單，製作中</span>
+                    {% elif order.status == 'completed' %}
+                        <span style="color:green;">✅ 餐點已完成</span>
+                    {% elif order.status == 'rejected' %}
+                        <span style="color:red;">❌ 訂單已取消</span>
+                    {% else %}
+                        {{ order.status }}
+                    {% endif %}
+                </p>
+                <p>預定取餐時間：<strong>{{ order.pickup_time }}</strong></p>
                 <table border="1" cellpadding="5" cellspacing="0">
                     <thead>
                         <tr>
@@ -49,6 +47,7 @@
                         </tr>
                     </tfoot>
                 </table>
+                <p class="order-time">下單時間：<span></span></p>
                 <br>
             </div>
         {% endfor %}

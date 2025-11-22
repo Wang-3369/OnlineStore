@@ -27,6 +27,7 @@ def get_products():
         "name": p["name"],
         "price": p["price"],
         "stock": p.get("stock", 10),
+        "description": p.get("description", ""),
         "image_id": str(p.get("image_id")) if p.get("image_id") else None
     } for p in products])
 
@@ -37,6 +38,7 @@ def add_product():
     name = request.form.get("name")
     price = float(request.form.get("price"))
     stock = int(request.form.get("stock", 10))
+    description = request.form.get("description", "")
     image_file = request.files.get("image")
 
     image_id = None
@@ -47,6 +49,7 @@ def add_product():
         "name": name,
         "price": price,
         "stock": stock,
+        "description": description,
         "image_id": image_id
     })
     return jsonify({"message": "商品新增成功"})
@@ -62,9 +65,10 @@ def update_product(product_id):
     name = request.form.get("name")
     price = float(request.form.get("price"))
     stock = int(request.form.get("stock", 10))
+    description = request.form.get("description", "")
     image_file = request.files.get("image")
 
-    update_data = {"name": name, "price": price, "stock": stock}
+    update_data = {"name": name, "price": price, "stock": stock, "description": description}
 
     if image_file:
         image_id = fs.put(image_file, filename=image_file.filename)

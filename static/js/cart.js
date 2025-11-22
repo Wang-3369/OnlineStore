@@ -54,9 +54,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const checkoutBtn = document.getElementById("checkout-btn");
     checkoutBtn?.addEventListener("click", async () => {
-        const res = await fetch("/api/cart/checkout", { method: "POST" });
+        const pickupTime = document.getElementById("pickup-time").value;
+        if (!pickupTime) {
+            alert("請設定取餐時間！");
+            return;
+        }
+
+        const res = await fetch("/api/cart/checkout", { 
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ pickup_time: pickupTime }) // 傳送時間
+        });
         const data = await res.json();
-        alert(data.message);
-        fetchCart();  // 結帳後刷新購物車
+        if(res.ok) {
+            alert(data.message);
+            fetchCart();
+            location.href = "/orders";  // 結帳後刷新購物車
+        } else {
+            alert(data.message);
+        }
     });
 });
