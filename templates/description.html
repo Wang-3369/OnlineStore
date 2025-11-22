@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div id="product-detail" class="product-detail-container">
+    <!-- 商品詳情將由 JS 動態生成 -->
+</div>
+
+<script defer src="{{ url_for('static', filename='js/description.js') }}"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/description.css') }}">
+{% endblock %}

@@ -15,8 +15,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         const div = document.createElement("div");
         div.classList.add("product-card");
         div.innerHTML = `
-            <img src="${imgUrl}" alt="${p.name}" style="width:150px;height:150px;">
-            <h3>${p.name}</h3>
+            <a href="/description/${p.id}">
+                <img src="${imgUrl}" alt="${p.name}" style="width:150px;height:150px;">
+                <h3>${p.name}</h3>
+            </a>
             <p style="color: #666; font-size: 0.9em;">${p.description || "尚無說明"}</p>
             <p>NT$ ${p.price}</p>
             <p>庫存：${p.stock}</p>

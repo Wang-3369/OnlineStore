@@ -6,6 +6,7 @@ from api.admin_api import admin_bp
 from api.orders_api import orders_bp
 from api.cart_api import cart_bp
 from api.profile_api import profile_bp
+from api.description_api import description_bp
 from database.db import products_collection  # 從 db.py 匯入 collection
 from dotenv import load_dotenv
 
@@ -19,6 +20,7 @@ app.register_blueprint(admin_bp)
 app.register_blueprint(cart_bp)
 app.register_blueprint(orders_bp)
 app.register_blueprint(profile_bp)
+app.register_blueprint(description_bp)
 
 @app.route('/')
 def index():
@@ -102,6 +104,12 @@ def admin_orders_page():
     if session.get("role") not in ["admin", "sub-admin"]:
         return redirect("/")
     return render_template("admin_orders.html")
+
+#詳情頁面
+@app.route("/description/<product_id>")
+def description_page(product_id):
+    return render_template("description.html")
+
 
 if __name__ == '__main__':
     app.run(debug=True)

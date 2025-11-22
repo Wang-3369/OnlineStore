@@ -11,7 +11,7 @@ cart_bp = Blueprint("cart", __name__)
 def add_to_cart():
     now = datetime.now(timezone.utc).astimezone()
     current_hour = datetime.now().hour
-    if not (5 <= current_hour < 14):
+    if not (6 <= current_hour < 14):
         return jsonify({"message": "目前非點餐時間 (06:00-14:00)"}), 400
 
     data = request.json
