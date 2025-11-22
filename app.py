@@ -64,8 +64,6 @@ def orders_page():
         orders.append(order)
     return render_template("orders.html", orders=orders)
 
-
-
 #購物車頁面
 @app.route("/cart")
 def cart_page():
@@ -97,6 +95,13 @@ def profile_page():
     user = users_collection.find_one({"username": session["username"]})
     
     return render_template("profile.html", user=user)
+
+# 老闆訂單管理頁面
+@app.route("/admin/orders")
+def admin_orders_page():
+    if session.get("role") not in ["admin", "sub-admin"]:
+        return redirect("/")
+    return render_template("admin_orders.html")
 
 if __name__ == '__main__':
     app.run(debug=True)

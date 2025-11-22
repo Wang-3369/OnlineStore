@@ -1,7 +1,7 @@
 from flask import Blueprint, session, request, jsonify
 from database.db import products_collection  # 商品 collection
 from bson.objectid import ObjectId
-from datetime import datetime, timezone
+from datetime import datetime, time, timezone   
 import uuid
 
 cart_bp = Blueprint("cart", __name__)
@@ -9,6 +9,11 @@ cart_bp = Blueprint("cart", __name__)
 # 加入購物車
 @cart_bp.route("/api/cart/add", methods=["POST"])
 def add_to_cart():
+    now = datetime.now(timezone.utc).astimezone()
+    current_hour = datetime.now().hour
+    if not (3 <= current_hour < 14):
+        return jsonify({"message": "目前非點餐時間 (06:00-14:00)"}), 400
+
     data = request.json
     product_id = str(data.get("product_id"))
     quantity = int(data.get("quantity", 1))
@@ -80,6 +85,10 @@ def checkout():
         return jsonify({"message": "購物車為空"}), 400
     if not username:
         return jsonify({"message": "尚未登入"}), 403
+    
+    pickup_time = request.json.get("pickup_time")
+    if not pickup_time:
+         return jsonify({"message": "請選擇取餐時間"}), 400
 
     # === 1. 結帳前先檢查庫存 ===
     for product_id, item in cart.items():
@@ -110,6 +119,8 @@ def checkout():
         "username": username,
         "products": cart,
         "total": total,
+        "pickup_time": pickup_time,
+        "status": "pending",
         "created_at": datetime.now(timezone.utc)  # <- 新增訂單建立時間
     }
     orders_collection.insert_one(order_data)

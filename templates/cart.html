@@ -17,6 +17,10 @@
 </table>
 
 <p id="total-price"></p>
+<div style="margin: 20px 0;">
+    <label for="pickup-time">預定取餐時間：</label>
+    <input type="time" id="pickup-time" required>
+</div>
 <button id="checkout-btn">結帳</button>
 
 <script src="{{ url_for('static', filename='js/cart.js') }}"></script>
