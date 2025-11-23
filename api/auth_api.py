@@ -107,7 +107,7 @@ def google_callback():
 
     # 設定 session
     session["username"] = email
-    session["role"] = "user"
+    session["role"] = user.get("role", "user")
     session["avatar"] = user.get("avatar")  # 自訂頭像優先
     session["google_avatar"] = user.get("google_avatar")  # Google頭像
 
