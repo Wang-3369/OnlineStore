@@ -19,7 +19,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                 <img src="${imgUrl}" alt="${p.name}" style="width:150px;height:150px;">
                 <h3>${p.name}</h3>
             </a>
-            <p style="color: #666; font-size: 0.9em;">${p.description || "尚無說明"}</p>
             <p>NT$ ${p.price}</p>
             <p>庫存：${p.stock}</p>
             <label>數量：
