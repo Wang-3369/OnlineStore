@@ -13,10 +13,20 @@
     <div class="dots" id="dots"></div>
 </div>
 
+<div class="main-container">
+    <!-- 左側固定分類欄 -->
+    <div class="category-sidebar" id="category-sidebar">
+        <div id="category-list">
+            <!-- JS 動態生成分類按鈕 -->
+        </div>
+    </div>
 
-<div class="product-list" id="product-list">
-    <!-- 商品列表將由 JS 動態生成 -->
+    <!-- 右側商品列表 -->
+    <div class="product-list-container" id="product-list-container">
+        <!-- JS 動態生成商品分類與商品卡片 -->
+    </div>
 </div>
+
 
 <script defer src="{{ url_for('static', filename='js/cartadd.js') }}"></script>
 <script defer src="{{ url_for('static', filename='js/promo.js') }}"></script>
