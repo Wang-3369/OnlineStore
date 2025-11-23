@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>促銷管理</h2>
+
+<div class="promo-admin-container">
+
+    <!-- 上傳區 -->
+    <div class="upload-box">
+        <h3>上傳促銷圖片</h3>
+        <form id="upload-form" enctype="multipart/form-data" method="POST" action="/api/promotions/upload">
+            <input type="file" name="image" accept="image/*" required>
+            <button type="submit">上傳</button>
+        </form>
+    </div>
+
+    <!-- 促銷圖片列表 -->
+    <div class="promo-list">
+        <h3>促銷圖片列表</h3>
+        <div id="promo-items" class="promo-items"></div>
+    </div>
+
+</div>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/promotions.css') }}">
+<script defer src="{{ url_for('static', filename='js/promotions.js') }}"></script>
+{% endblock %}

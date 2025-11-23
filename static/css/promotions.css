@@ -1,0 +1,23 @@
+.promo-slider {
+    width: 600px;         /* 輪播框寬度 */
+    height: 300px;        /* 輪播框高度 */
+    margin: 2rem auto;    /* 置中 */
+    overflow: hidden;     /* 超出隱藏 */
+    border: 2px solid #333; /* 輪播框邊框 */
+    border-radius: 8px;
+    position: relative;
+    background: #f5f5f5;
+}
+
+.promo-track {
+    display: flex;
+    transition: transform 0.3s ease-in-out; /* 切換圖片速度快 */
+    height: 100%;
+}
+
+.promo-track img {
+    width: 100%;   /* 滿框顯示 */
+    height: 100%;
+    object-fit: contain; /* 圖片置中且完整顯示 */
+    flex-shrink: 0;      /* 防止縮小 */
+}

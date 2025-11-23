@@ -1,9 +1,25 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>商品列表</h2>
+
+<!-- 促銷輪播區 -->
+<div class="promo-slider-container">
+    <div class="promo-slider" id="promo-slider">
+        <!-- JS 動態插入圖片 -->
+    </div>
+    <!-- 左右箭頭 -->
+    <button class="prev">&lt;</button>
+    <button class="next">&gt;</button>
+    <!-- 圓點指示 -->
+    <div class="dots" id="dots"></div>
+</div>
+
+
 <div class="product-list" id="product-list">
     <!-- 商品列表將由 JS 動態生成 -->
 </div>
 
 <script defer src="{{ url_for('static', filename='js/cartadd.js') }}"></script>
+<script defer src="{{ url_for('static', filename='js/promo.js') }}"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+
 {% endblock %}
