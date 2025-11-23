@@ -1,23 +1,46 @@
-.promo-slider {
-    width: 600px;         /* 輪播框寬度 */
-    height: 300px;        /* 輪播框高度 */
-    margin: 2rem auto;    /* 置中 */
-    overflow: hidden;     /* 超出隱藏 */
-    border: 2px solid #333; /* 輪播框邊框 */
-    border-radius: 8px;
-    position: relative;
-    background: #f5f5f5;
-}
-
-.promo-track {
+.promo-admin-container {
     display: flex;
-    transition: transform 0.3s ease-in-out; /* 切換圖片速度快 */
-    height: 100%;
+    gap: 2rem;
+    margin: 2rem 0;
 }
 
-.promo-track img {
-    width: 100%;   /* 滿框顯示 */
-    height: 100%;
-    object-fit: contain; /* 圖片置中且完整顯示 */
-    flex-shrink: 0;      /* 防止縮小 */
+.upload-box, .promo-list {
+    flex: 1;
+    padding: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+}
+
+.promo-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.promo-item {
+    position: relative;
+}
+
+.promo-item img {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.promo-item button.delete-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: rgba(255,0,0,0.8);
+    color: white;
+    border: none;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.promo-item button.delete-btn:hover {
+    background: rgba(255,0,0,1);
 }
