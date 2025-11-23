@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify, session
-from database.db import users_collection, orders_collection
+from database.db import users_collection, orders_collection,products_collection
 from bson.objectid import ObjectId
 
 admin_bp = Blueprint("admin", __name__)
@@ -100,11 +100,25 @@ def update_order_status():
     if not order_id or not new_status:
         return jsonify({"message": "參數錯誤"}), 400
 
+    # 取得訂單
+    order = orders_collection.find_one({"order_id": order_id})
+    if not order:
+        return jsonify({"message": "找不到訂單"}), 404
+
+    # 拒絕訂單回補庫存 (只回補非已拒絕訂單)
+    if new_status == "rejected" and order.get("status") != "rejected":
+        for pid, item in order.get("products", {}).items():
+            products_collection.update_one(
+                {"_id": ObjectId(pid)},  # <-- 改這裡
+                {"$inc": {"stock": item["quantity"]}}
+            )
+
+    # 更新訂單狀態
     result = orders_collection.update_one(
         {"order_id": order_id},
         {"$set": {"status": new_status}}
     )
-    
+
     if result.modified_count > 0:
         return jsonify({"message": f"訂單狀態已更新為 {new_status}"})
     else:
