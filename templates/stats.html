@@ -20,13 +20,24 @@
     <button id="clearOrdersBtn">清理訂單</button>
     <p id="clearResult"></p>
 
+    <!-- 日期篩選 -->
+    <label for="startDate">開始日期：</label>
+    <input type="date" id="startDate">
+    <label for="endDate">結束日期：</label>
+    <input type="date" id="endDate">
+    <button id="filterDateBtn">篩選</button><br>
+
+
     <!-- 圖表切換按鈕 -->
     <div class="chart-switch">
         <button onclick="showChart('bar')">長條圖</button>
+        <button id="barByProductBtn">依商品累計</button>
+        <button id="barByDateBtn">依日期群組</button>
         <button onclick="showChart('line')">折線圖</button>
         <button onclick="showChart('pie')">圓餅圖</button>
         <button onclick="exportCSV()">下載 CSV</button>
     </div>
+
 
     <!-- 圖表容器 -->
     <div class="chart-box">

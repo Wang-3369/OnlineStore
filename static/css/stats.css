@@ -16,8 +16,15 @@
 }
 
 .chart-box {
-    background: white;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 0 10px #ccc;
+    position: relative;
+    width: 100%;
+    max-width: 900px;  /* 最大寬度 */
+    height: 400px;     /* 高度限制 */
+    margin-top: 20px;
 }
+
+.chart-box canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
