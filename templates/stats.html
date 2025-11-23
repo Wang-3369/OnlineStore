@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="stats-container">
+
+    <h2>商品銷售統計</h2>
+
+    <!-- 開關：包含未完成訂單 -->
+    <label>
+        <input type="checkbox" id="includePending"> 包含未完成訂單
+    </label>
+    <br>
+
+    <!-- 清理訂單選擇 -->
+    <label for="clearType">選擇要刪除的訂單類型：</label>
+    <select id="clearType">
+        <option value="completed">完成訂單</option>
+        <option value="pending">未完成訂單</option>
+        <option value="missing">缺失 status 訂單</option>
+    </select>
+    <button id="clearOrdersBtn">清理訂單</button>
+    <p id="clearResult"></p>
+
+    <!-- 圖表切換按鈕 -->
+    <div class="chart-switch">
+        <button onclick="showChart('bar')">長條圖</button>
+        <button onclick="showChart('line')">折線圖</button>
+        <button onclick="showChart('pie')">圓餅圖</button>
+        <button onclick="exportCSV()">下載 CSV</button>
+    </div>
+
+    <!-- 圖表容器 -->
+    <div class="chart-box">
+        <canvas id="barChart"></canvas>
+        <canvas id="lineChart" style="display:none;"></canvas>
+        <canvas id="pieChart" style="display:none;"></canvas>
+    </div>
+
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script defer src="{{ url_for('static', filename='js/stats.js') }}"></script>
+{% endblock %}

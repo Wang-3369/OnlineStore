@@ -1,0 +1,82 @@
+/* ===== 登入頁外框 ===== */
+.login-container {
+    width: 100%;
+    max-width: 400px;
+    margin: 80px auto;
+    padding: 30px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    text-align: center;
+    font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+}
+
+/* ===== 標題 ===== */
+.login-container h2 {
+    margin-bottom: 20px;
+    font-size: 28px;
+    color: #333;
+}
+
+/* ===== 表單 ===== */
+#login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* ===== label 與輸入框 ===== */
+#login-form label {
+    text-align: left;
+    font-size: 15px;
+    color: #444;
+}
+
+#login-form input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: 0.2s;
+}
+
+#login-form input:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 4px rgba(0,123,255,0.3);
+    outline: none;
+}
+
+/* ===== 按鈕 ===== */
+#login-form button {
+    margin-top: 10px;
+    padding: 10px;
+    background: #007bff;
+    border: none;
+    color: white;
+    font-size: 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.25s;
+}
+
+#login-form button:hover {
+    background: #0056d2;
+}
+
+/* ===== 註冊連結 ===== */
+.login-container a {
+    color: #0057d9;
+    text-decoration: none;
+}
+
+.login-container a:hover {
+    text-decoration: underline;
+}
+
+/* ===== Google 按鈕 ===== */
+.google-login-btn img {
+    width: 230px;
+    margin-top: 10px;
+    cursor: pointer;
+}

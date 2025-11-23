@@ -1,0 +1,23 @@
+.stats-container {
+    padding: 20px;
+}
+
+.filter-box {
+    margin-bottom: 20px;
+    background: #fafafa;
+    padding: 12px;
+    border-radius: 8px;
+    display: flex;
+    gap: 15px;
+}
+
+.chart-switch button {
+    margin-right: 10px;
+}
+
+.chart-box {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 0 10px #ccc;
+}

@@ -15,6 +15,7 @@
             {% if session.get("username") %}
                 {% if session.get("role") in ["admin", "sub-admin"] %}
                     <a href="/admin">商品管理</a>
+                    <a href="/admin/stats">商品統計</a>
                     {% if session.get("role") in ["admin"] %}
                         <a href="/admin/orders">接單系統</a>
                         <a href="/admin/user">人員管理</a>

@@ -2,7 +2,10 @@
 {% block content %}
 <h2>管理後台 - 商品管理</h2>
 
+<!-- 商品列表 -->
 <div id="product-list"></div>
+
+<hr>
 
 <h3>新增商品</h3>
 <form id="add-form" enctype="multipart/form-data">
@@ -11,8 +14,18 @@
     <input type="number" name="stock" placeholder="庫存" min="0" step="1" required>
     <textarea name="description" placeholder="餐點說明" rows="3"></textarea>
     <input type="file" name="image" accept="image/*">
-    <button type="submit">新增</button>
+    <br>
+    <label>分類:</label>
+    <select name="category" id="categorySelect"></select>
+    <br><br>
+    <button type="submit">新增商品</button>
 </form>
+
+<hr>
+
+<h3>管理分類</h3>
+<input type="text" id="newCategory" placeholder="分類名稱">
+<button type="button" id="addCategoryBtn">新增分類</button>
 
 <script defer src="{{ url_for('static', filename='js/admin.js') }}"></script>
 {% endblock %}
