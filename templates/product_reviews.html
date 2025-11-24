@@ -4,9 +4,26 @@
 <div class="review-page-container">
     <h2>所有評論</h2>
 
+    <!-- 排序選單 -->
+    <div class="review-sort">
+        <label for="sort-select">排序方式：</label>
+        <select id="sort-select">
+            <option value="time-desc">依時間 (最新→最舊)</option>
+            <option value="time-asc">依時間 (最舊→最新)</option>
+            <option value="rating-desc">依星級 (高→低)</option>
+            <option value="rating-asc">依星級 (低→高)</option>
+        </select>
+    </div>
+
+    <!-- 星級統計圖 -->
+    <div class="review-stats">
+        <canvas id="rating-chart" width="400" height="150"></canvas>
+    </div>
+
     <div id="review-section">載入中...</div>
 </div>
 
 <link rel="stylesheet" href="{{ url_for('static', filename='css/review_page.css') }}">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script defer src="{{ url_for('static', filename='js/review_page.js') }}"></script>
 {% endblock %}

@@ -1,5 +1,7 @@
 document.addEventListener("DOMContentLoaded", async () => {
     const reviewBox = document.getElementById("review-section");
+    const sortSelect = document.getElementById("sort-select");
+    let reviewsData = [];
 
     async function loadReviews() {
         const res = await fetch("/api/reviews");
@@ -8,13 +10,26 @@ document.addEventListener("DOMContentLoaded", async () => {
             return;
         }
 
-        const reviews = await res.json();
-        if (reviews.length === 0) {
+        reviewsData = await res.json();
+        if (reviewsData.length === 0) {
             reviewBox.innerHTML = "<p>尚無評論</p>";
             return;
         }
 
-        reviewBox.innerHTML = reviews.map(r => `
+        renderReviews();
+        renderRatingChart();
+    }
+
+    function renderReviews() {
+        let sortedReviews = [...reviewsData];
+        const sortVal = sortSelect.value;
+
+        if (sortVal === "time-desc") sortedReviews.sort((a,b)=> new Date(b.created_at) - new Date(a.created_at));
+        else if (sortVal === "time-asc") sortedReviews.sort((a,b)=> new Date(a.created_at) - new Date(b.created_at));
+        else if (sortVal === "rating-desc") sortedReviews.sort((a,b)=> b.rating - a.rating);
+        else if (sortVal === "rating-asc") sortedReviews.sort((a,b)=> a.rating - b.rating);
+
+        reviewBox.innerHTML = sortedReviews.map(r => `
             <div class="review-item" data-id="${r._id}">
                 <div class="review-header">
                     <strong>${r.username}</strong>
@@ -57,6 +72,29 @@ document.addEventListener("DOMContentLoaded", async () => {
             });
         });
     }
+
+    // 星級統計圖
+    function renderRatingChart() {
+        const counts = [0,0,0,0,0];
+        reviewsData.forEach(r => counts[r.rating - 1]++);
+        const ctx = document.getElementById("rating-chart").getContext("2d");
+
+        if (window.ratingChart) window.ratingChart.destroy();
+        window.ratingChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['★1','★2','★3','★4','★5'],
+                datasets: [{
+                    label: '評論數量',
+                    data: counts,
+                    backgroundColor: '#f39c12'
+                }]
+            },
+            options: { responsive: true, scales: { y: { beginAtZero: true } } }
+        });
+    }
+
+    sortSelect.addEventListener("change", renderReviews);
 
     loadReviews();
 });
