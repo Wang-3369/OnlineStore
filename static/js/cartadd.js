@@ -1,21 +1,10 @@
-let categories = [];
+let categories = [];   // 將由商品資料決定分類順序
 
-// 取得分類
-async function fetchCategories() {
-    try {
-        const res = await fetch("/api/categories");
-        categories = await res.json();
-    } catch(e) {
-        console.error("抓分類失敗", e);
-        categories = ["其他"];
-    }
-    renderCategoryButtons();
-}
-
-// 渲染左側分類按鈕
+// 渲染左側分類按鈕（依商品分類順序）
 function renderCategoryButtons() {
     const container = document.getElementById("category-list");
     container.innerHTML = "";
+
     categories.forEach(c => {
         const btn = document.createElement("button");
         btn.innerText = c;
@@ -27,7 +16,7 @@ function renderCategoryButtons() {
 // 滾動到對應分類
 function scrollToCategory(cat) {
     const el = document.getElementById(`category-${cat}`);
-    if(el) el.scrollIntoView({behavior:"smooth", block:"center"});
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
 // 取得商品
@@ -39,15 +28,24 @@ async function fetchProducts() {
         const res = await fetch("/api/products");
         const products = await res.json();
 
-        // 按分類分組
+        // 按分類分組 + 記錄分類順序
         const grouped = {};
+        categories = [];  // 重新開始由商品決定分類順序
+
         products.forEach(p => {
             const cat = p.category || "其他";
-            if(!grouped[cat]) grouped[cat] = [];
+            if (!grouped[cat]) {
+                grouped[cat] = [];
+                categories.push(cat);     // ← 記錄分類順序
+            }
             grouped[cat].push(p);
         });
 
-        for(const cat of Object.keys(grouped)){
+        // 渲染分類按鈕（依商品分類順序）
+        renderCategoryButtons();
+
+        // 渲染商品區塊
+        for (const cat of categories) {
             const section = document.createElement("div");
             section.classList.add("product-category");
             section.id = `category-${cat}`;
@@ -57,9 +55,13 @@ async function fetchProducts() {
             section.appendChild(h3);
 
             grouped[cat].forEach(p => {
-                const imgUrl = p.image_id ? `/api/products/image/${p.image_id}` : "/static/images/no-image.png";
+                const imgUrl = p.image_id
+                    ? `/api/products/image/${p.image_id}`
+                    : "/static/images/no-image.png";
+
                 const card = document.createElement("div");
                 card.className = "product-card";
+
                 card.innerHTML = `
                     <a href="/description/${p.id}">
                         <img src="${imgUrl}" alt="${p.name}">
@@ -85,20 +87,20 @@ async function fetchProducts() {
         }
 
         bindAddCartButtons();
-    } catch(e) {
+    } catch (e) {
         console.error("抓商品失敗", e);
     }
 }
 
 // 綁定加入購物車
-function bindAddCartButtons(){
-    document.querySelectorAll(".add-cart-btn").forEach(btn=>{
-        btn.onclick = async ()=>{
+function bindAddCartButtons() {
+    document.querySelectorAll(".add-cart-btn").forEach(btn => {
+        btn.onclick = async () => {
             const productId = btn.dataset.id;
-            const qty = parseInt(document.getElementById(`qty-${productId}`).value)||1;
+            const qty = parseInt(document.getElementById(`qty-${productId}`).value) || 1;
             const res = await fetch("/api/cart/add", {
-                method:"POST",
-                headers:{"Content-Type":"application/json"},
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     product_id: productId,
                     quantity: qty,
@@ -114,18 +116,19 @@ function bindAddCartButtons(){
 }
 
 // 滾動時高亮分類
-window.addEventListener("scroll", ()=>{
+window.addEventListener("scroll", () => {
     const sidebarBtns = document.querySelectorAll("#category-list button");
-    const scrollCenter = window.innerHeight/2 + window.scrollY;
+    const scrollCenter = window.innerHeight / 2 + window.scrollY;
 
-    sidebarBtns.forEach(btn=>{
+    sidebarBtns.forEach(btn => {
         const cat = btn.innerText;
         const section = document.getElementById(`category-${cat}`);
-        if(section){
+        if (section) {
             const rect = section.getBoundingClientRect();
             const top = rect.top + window.scrollY;
             const bottom = top + rect.height;
-            if(scrollCenter>=top && scrollCenter<=bottom){
+
+            if (scrollCenter >= top && scrollCenter <= bottom) {
                 btn.classList.add("active");
             } else {
                 btn.classList.remove("active");
@@ -138,7 +141,7 @@ window.addEventListener("scroll", ()=>{
 function adjustSidebarHeight() {
     const firstCategory = document.querySelector('.product-category');
     const sidebar = document.querySelector('.category-sidebar');
-    if(firstCategory && sidebar) {
+    if (firstCategory && sidebar) {
         const rect = firstCategory.getBoundingClientRect();
         sidebar.style.maxHeight = rect.height + 'px';
     }
@@ -147,14 +150,11 @@ function adjustSidebarHeight() {
 window.addEventListener("resize", adjustSidebarHeight);
 window.addEventListener("load", adjustSidebarHeight);
 
-
 // 初始化
-async function init(){
-    await fetchCategories();
-    await fetchProducts();
+async function init() {
+    await fetchProducts();   // 只需抓商品，分類由商品決定
     adjustSidebarHeight();
 }
 
-// DOM 載入後
 document.addEventListener("DOMContentLoaded", init);
 window.addEventListener("resize", adjustSidebarHeight);
