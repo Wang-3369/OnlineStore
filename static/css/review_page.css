@@ -1,0 +1,61 @@
+.review-page-container {
+    max-width: 900px;
+    margin: auto;
+    padding: 20px;
+}
+
+#review-section {
+    margin-top: 20px;
+}
+
+.review-item {
+    padding: 10px 5px;
+    border-bottom: 1px solid #eee;
+}
+
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.review-header strong {
+    color: #333;
+}
+
+.review-rating {
+    color: #ffcc00;
+}
+
+.review-reply {
+    background-color: #f0f0f0;
+    padding: 0.5rem;
+    margin-top: 0.3rem;
+    border-radius: 4px;
+}
+
+.delete-btn, .reply-btn {
+    margin-top: 0.3rem;
+    margin-right: 5px;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    color: #fff;
+}
+
+.delete-btn {
+    background-color: #e74c3c;
+}
+
+.delete-btn:hover {
+    background-color: #c0392b;
+}
+
+.reply-btn {
+    background-color: #3498db;
+}
+
+.reply-btn:hover {
+    background-color: #2980b9;
+}

@@ -103,3 +103,5 @@
 .product-info button:active {
     transform: translateY(1px) scale(0.97); /* 縮小並往下微位移 */
     box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* 加上輕微陰影 */
+}
+

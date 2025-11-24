@@ -9,7 +9,8 @@ from api.profile_api import profile_bp
 from api.description_api import description_bp
 from api.promotions_api import promotion_bp
 from api.stats_api import stats_api
-from database.db import products_collection  # 從 db.py 匯入 collection
+from api.review_api import review_api
+from database.db import products_collection,orders_collection, product_reviews_collection  # 從 db.py 匯入 collection
 from dotenv import load_dotenv
 
 app = Flask(__name__)
@@ -25,6 +26,7 @@ app.register_blueprint(profile_bp)
 app.register_blueprint(description_bp)
 app.register_blueprint(promotion_bp)
 app.register_blueprint(stats_api)
+app.register_blueprint(review_api)
 
 @app.route('/')
 def index():
@@ -54,21 +56,34 @@ def logout_page():
     return redirect("/")
 
 #訂單頁面
+#訂單頁面
 @app.route("/orders")
 def orders_page():
     if not session.get("username"):
         return "請先登入", 403
 
-    from database.db import orders_collection
     username = session.get("username")
     orders_cursor = orders_collection.find({"username": username})
     orders = []
+
     for order in orders_cursor:
         order["_id"] = str(order["_id"])
-        # 確保 products 是 dict
         order["products"] = dict(order["products"])
+
+        # 查詢使用者是否已對此訂單評論過
+        review = product_reviews_collection.find_one({"username": username, "order_id": order["order_id"]})
+        if review:
+            order["review"] = {
+                "content": review["content"],
+                "rating": review["rating"]
+            }
+        else:
+            order["review"] = None
+
         orders.append(order)
+
     return render_template("orders.html", orders=orders)
+
 
 #購物車頁面
 @app.route("/cart")
@@ -126,6 +141,12 @@ def admin_promotions_page():
 def stats_page():
     return render_template("stats.html")
 
+#評論區
+@app.route("/reviews")
+def product_reviews_page():
+    if not session.get("username"):
+        return redirect("/login")
+    return render_template("product_reviews.html")
 
 if __name__ == '__main__':
     app.run(debug=True)

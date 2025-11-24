@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="review-page-container">
+    <h2>所有評論</h2>
+
+    <div id="review-section">載入中...</div>
+</div>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/review_page.css') }}">
+<script defer src="{{ url_for('static', filename='js/review_page.js') }}"></script>
+{% endblock %}
