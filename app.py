@@ -1,5 +1,6 @@
 import os
 from flask import Flask, render_template, session, redirect
+# 導入各模組的 Blueprint
 from api.product_api import product_bp
 from api.auth_api import auth_bp
 from api.admin_api import admin_bp
@@ -10,13 +11,15 @@ from api.description_api import description_bp
 from api.promotions_api import promotion_bp
 from api.stats_api import stats_api
 from api.review_api import review_api
-from database.db import products_collection,orders_collection, product_reviews_collection  # 從 db.py 匯入 collection
+# 導入資料庫 Collection
+from database.db import products_collection, orders_collection, product_reviews_collection
 from dotenv import load_dotenv
 
 app = Flask(__name__)
+# 設定 session 用的 secret key，從 .env 讀取，若沒有則用預設
 app.secret_key = os.getenv("SECRET_KEY", "mydefaultsecret")
 
-# 載入 API
+# 註冊各個 API blueprint
 app.register_blueprint(auth_bp)
 app.register_blueprint(product_bp)
 app.register_blueprint(admin_bp)
@@ -28,35 +31,42 @@ app.register_blueprint(promotion_bp)
 app.register_blueprint(stats_api)
 app.register_blueprint(review_api)
 
+# ------------------------------
+# 路由設定
+# ------------------------------
+
 @app.route('/')
 def index():
+    """
+    首頁，顯示所有商品
+    """
     products = []
+    # 從 MongoDB 讀取所有商品資料
     for p in products_collection.find():
         products.append({
-            "id": str(p["_id"]),
+            "id": str(p["_id"]),  # Mongo ObjectId 轉成字串
             "name": p["name"],
             "price": p["price"]
         })
     return render_template("index.html", products=products)
 
-#登入頁面           
+# 登入頁面
 @app.route("/login")
 def login_page():
     return render_template("login.html")
 
-#註冊頁面
+# 註冊頁面
 @app.route("/register")
 def register_page():
     return render_template("register.html")
 
-#登出
+# 登出，清空 session
 @app.route("/logout")
 def logout_page():
     session.clear()
     return redirect("/")
 
-#訂單頁面
-#訂單頁面
+# 使用者訂單頁面
 @app.route("/orders")
 def orders_page():
     if not session.get("username"):
@@ -84,20 +94,19 @@ def orders_page():
 
     return render_template("orders.html", orders=orders)
 
-
-#購物車頁面
+# 購物車頁面
 @app.route("/cart")
 def cart_page():
     return render_template("cart.html")
 
-#商品修改頁面
+# 管理員商品修改頁面
 @app.route("/admin")
 def admin_page():
     if session.get("role") not in ["admin", "sub-admin"]:
         return redirect("/")
     return render_template("admin.html")
 
-#人員管理頁面
+# 管理員使用者管理頁面
 @app.route("/admin/user")
 def admin_user_page():
     if session.get("role") != "admin":
@@ -117,36 +126,37 @@ def profile_page():
     
     return render_template("profile.html", user=user)
 
-# 老闆訂單管理頁面
+# 管理員訂單管理頁面
 @app.route("/admin/orders")
 def admin_orders_page():
     if session.get("role") not in ["admin", "sub-admin"]:
         return redirect("/")
     return render_template("admin_orders.html")
 
-#詳情頁面
+# 商品詳情頁面
 @app.route("/description/<product_id>")
 def description_page(product_id):
     return render_template("description.html")
 
-#促銷增加頁面
+# 管理員促銷管理頁面
 @app.route("/admin/promotions")
 def admin_promotions_page():
     if session.get("role") not in ["admin", "sub-admin"]:
         return "沒有權限", 403
     return render_template("promotions.html")
 
-#統計頁面
+# 管理員統計頁面
 @app.route("/admin/stats")
 def stats_page():
     return render_template("stats.html")
 
-#評論區
+# 評論區頁面
 @app.route("/reviews")
 def product_reviews_page():
     if not session.get("username"):
         return redirect("/login")
     return render_template("product_reviews.html")
 
+# 啟動 Flask
 if __name__ == '__main__':
     app.run(debug=True)
