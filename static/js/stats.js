@@ -189,4 +189,28 @@ document.addEventListener("DOMContentLoaded", () => {
             loadPieChart();
         });
     }
+
+   refreshRevenue();
+        
 });
+
+//營業額
+async function refreshRevenue() {
+    try {
+        const response = await fetch("/api/orders");
+        if (!response.ok) throw new Error("抓資料失敗：" + response.status);
+
+        const data = await response.json();
+        const orders = data.orders || [];
+
+        let revenue = 0;
+        orders.forEach(order => {
+            revenue += order.total;
+        });
+        document.getElementById("totalRevenue").textContent = revenue;
+
+    } catch (err) {
+        console.error(err);
+        document.getElementById("totalRevenue").textContent = 0;
+    }
+}
