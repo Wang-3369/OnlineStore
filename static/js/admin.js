@@ -70,6 +70,9 @@ async function fetchProducts() {
                     <input type="text" id="name-${p.id}" value="${p.name}">
                     <input type="number" id="price-${p.id}" value="${p.price}" step="0.01">
                     <input type="number" id="stock-${p.id}" value="${p.stock}" step="1">
+
+                    <textarea id="desc-${p.id}" placeholder="餐點描述" style="width:100%;height:60px;">${p.description}</textarea>
+
                     <select id="category-${p.id}">
                         ${categories.map(c => `<option value="${c}" ${c===p.category?'selected':''}>${c}</option>`).join("")}
                     </select>
@@ -96,6 +99,7 @@ async function updateProduct(id) {
     formData.append("price", document.getElementById(`price-${id}`).value);
     formData.append("stock", document.getElementById(`stock-${id}`).value);
     formData.append("category", document.getElementById(`category-${id}`).value);
+    formData.append("description", document.getElementById(`desc-${id}`).value);
     const imageInput = document.getElementById(`image-${id}`);
     if(imageInput.files.length>0) formData.append("image", imageInput.files[0]);
 
