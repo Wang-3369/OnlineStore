@@ -185,9 +185,15 @@
         top: 0;
         margin-bottom: 20px;
     }
-    #category-list button {
-        width: auto;
-        margin-right: 5px;
+    #category-list {
+        display: flex;
+        gap: 5px;
+    }
+     #category-list button {
+        flex: 1;          /* 平分可用寬度 */
+        min-width: 80px;  /* 可設定最小寬度避免太窄 */
+        width: auto;      /* 可移除 width: auto */
+        margin-right:5px;
     }
     .product-list-container {
         margin-left: 0;
