@@ -17,10 +17,18 @@
 </table>
 
 <p id="total-price"></p>
+
 <div style="margin: 20px 0;">
     <label for="pickup-time">預定取餐時間：</label>
     <input type="time" id="pickup-time" required>
 </div>
+
+<!--備註欄位 -->
+<div style="margin: 20px 0;">
+    <label for="order-note">備註：</label><br>
+    <textarea id="order-note" rows="3" style="width: 100%;" placeholder="例如：少冰、不辣、不要香菜"></textarea>
+</div>
+
 <button id="checkout-btn">結帳</button>
 
 <script src="{{ url_for('static', filename='js/cart.js') }}"></script>

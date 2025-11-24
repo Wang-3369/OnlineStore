@@ -90,6 +90,9 @@ def checkout():
     if not pickup_time:
          return jsonify({"message": "請選擇取餐時間"}), 400
 
+    #取得備註（可為空）
+    note = request.json.get("note", "")
+
     # === 1. 結帳前先檢查庫存 ===
     for product_id, item in cart.items():
         product = products_collection.find_one({"_id": ObjectId(product_id)})
@@ -120,6 +123,7 @@ def checkout():
         "products": cart,
         "total": total,
         "pickup_time": pickup_time,
+        "note": note,
         "status": "pending",
         "created_at": datetime.now(timezone.utc)  # <- 新增訂單建立時間
     }
@@ -132,6 +136,7 @@ def checkout():
         "message": f"結帳成功！訂單編號：{order_id}",
         "order_id": order_id,
         "total": total,
+        "note": note,
         "created_at": order_data["created_at"].isoformat()  # 回傳 ISO 字串
     })
     
