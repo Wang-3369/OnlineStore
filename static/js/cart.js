@@ -63,7 +63,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const res = await fetch("/api/cart/checkout", { 
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ pickup_time: pickupTime }) // 傳送時間
+            body: JSON.stringify({
+                pickup_time: pickupTime,
+                note: document.getElementById("order-note").value
+            }) // 傳送時間及備註
         });
         const data = await res.json();
         if(res.ok) {

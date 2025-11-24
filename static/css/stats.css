@@ -1,26 +1,95 @@
+/* ===== 整體容器 ===== */
 .stats-container {
+    padding: 30px;
+    max-width: 1000px;
+    margin: 0 auto;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
+}
+
+/* 標題 */
+.stats-container h2 {
+    margin-bottom: 20px;
+    font-size: 28px;
+    color: #1a73e8;
+}
+
+/* 營業額/毛利 summary 卡片 */
+.summary-box {
+    background: #f1f5f9;
+    border-radius: 12px;
     padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    font-size: 18px;
+}
+
+/* 篩選區塊 */
+.filter-box, .chart-switch {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 20px;
 }
 
 .filter-box {
-    margin-bottom: 20px;
-    background: #fafafa;
-    padding: 12px;
-    border-radius: 8px;
-    display: flex;
-    gap: 15px;
+    background: #ffffff;
+    padding: 15px 20px;
+    border-radius: 10px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+    align-items: center;
 }
 
+/* 篩選區塊內文字與輸入 */
+.filter-box label, 
+.filter-box input, 
+.filter-box select, 
+.filter-box button {
+    font-size: 14px;
+}
+
+/* Checkbox 美化 */
+.filter-box input[type="checkbox"] {
+    margin-right: 6px;
+    accent-color: #1a73e8;
+}
+
+/* 按鈕統一樣式 */
+button {
+    background-color: #1a73e8;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+button:hover {
+    background-color: #155ab6;
+}
+
+button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+/* 圖表切換按鈕間距 */
 .chart-switch button {
-    margin-right: 10px;
+    margin: 4px 4px 0 0;
 }
 
+/* 圖表容器 */
 .chart-box {
     position: relative;
     width: 100%;
-    max-width: 900px;  /* 最大寬度 */
-    height: 400px;     /* 高度限制 */
+    max-width: 900px;
+    height: 450px;
     margin-top: 20px;
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
 
 .chart-box canvas {
@@ -28,3 +97,16 @@
     height: 100% !important;
 }
 
+/* 日期篩選與清理訂單輸入欄位 */
+input[type="date"], select {
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+}
+
+#clearResult {
+    margin-top: 6px;
+    font-size: 14px;
+    color: #555;
+}

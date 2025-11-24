@@ -61,6 +61,7 @@ async function fetchOrders() {
             </div>
             <p><strong>顧客：</strong> ${order.username}</p>
             <p><strong>取餐時間：</strong> ${order.pickup_time || '未指定'}</p>
+            <p><strong>備註：</strong> ${order.note || '（無備註）'}</p>
             <p><strong>狀態：</strong> ${order.status}</p>
             <p><strong>總金額：</strong> $${order.total}</p>
             <hr>
