@@ -5,7 +5,7 @@
 <div id="orders-container">
     {% if orders %}
         {% for order in orders %}
-            <div class="order-block" data-created-at="{{ order.created_at.isoformat() }}">
+            <div class="order-block status-{{ order.status }}" data-created-at="{{ order.created_at.isoformat() }}">
                 <h3>訂單編號：{{ order.order_id }}</h3>
                 <p>狀態：
                     {% if order.status == 'pending' %}
@@ -63,11 +63,17 @@
                             </span>
                             <p>{{ order.review.content }}</p>
                         </div>
+                        {% if order.review.reply %}
+                            <div class="review-reply">
+                                <strong>管理者回覆：</strong>{{ order.review.reply }}
+                            </div>
+                        {% endif %}
                         <button class="review-btn" disabled style="cursor:not-allowed;">已評論</button>
                     {% else %}
                         <button class="review-btn" data-order-id="{{ order.order_id }}">留下評論</button>
                     {% endif %}
                 {% endif %}
+
 
                 <br><br>
             </div>

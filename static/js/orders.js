@@ -4,25 +4,33 @@ let selectedRating = 0;
 document.addEventListener("DOMContentLoaded", async () => {
     const orders = document.querySelectorAll(".order-block");
 
+    // 取得所有評論
+    const res = await fetch("/api/reviews");
+    const reviews = await res.json();
+
     for (const order of orders) {
         const orderId = order.querySelector(".review-btn")?.dataset.orderId;
         if (!orderId) continue;
 
-        // 查詢是否已評論
-        const res = await fetch("/api/reviews");
-        const reviews = await res.json();
-        const hasReviewed = reviews.some(r => r.order_id === orderId);
-        if (hasReviewed) {
+        const review = reviews.find(r => r.order_id === orderId);
+        if (review) {
             const btn = order.querySelector(".review-btn");
             btn.textContent = "已評論";
             btn.disabled = true;
             btn.style.cursor = "not-allowed";
+
+            // 如果有管理者回覆，顯示回覆內容
+            if (review.reply) {
+                const userReview = order.querySelector(".user-review");
+                if (userReview) {
+                    let replyDiv = document.createElement("div");
+                    replyDiv.classList.add("review-reply");
+                    replyDiv.innerHTML = `<strong>管理者回覆：</strong>${review.reply}`;
+                    userReview.insertAdjacentElement('afterend', replyDiv);
+                }
+            }
         }
     }
-});
-
-
-document.addEventListener("DOMContentLoaded", () => {
 
     // 顯示建立時間
     document.querySelectorAll(".order-block").forEach(order => {
@@ -46,7 +54,6 @@ document.addEventListener("DOMContentLoaded", () => {
         star.addEventListener("click", () => {
             selectedRating = parseInt(star.dataset.star);
 
-            // 塗色
             document.querySelectorAll("#star-rating span").forEach(s => s.classList.remove("selected"));
             for (let i = 0; i < selectedRating; i++) {
                 document.querySelectorAll("#star-rating span")[i].classList.add("selected");
@@ -56,7 +63,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 送出評論
     document.getElementById("submit-review").addEventListener("click", async () => {
-
         const content = document.getElementById("review-text").value;
 
         if (selectedRating === 0) {
@@ -82,6 +88,12 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("review-text").value = "";
         document.getElementById("review-modal").style.display = "none";
         document.querySelectorAll("#star-rating span").forEach(s => s.classList.remove("selected"));
+
+        // 更新該訂單區塊為已評論
+        const btn = document.querySelector(`.review-btn[data-order-id="${currentOrderId}"]`);
+        btn.textContent = "已評論";
+        btn.disabled = true;
+        btn.style.cursor = "not-allowed";
     });
 
     // 取消評論
