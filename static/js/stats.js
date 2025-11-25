@@ -75,11 +75,16 @@ async function loadBarChartByProduct() {
 
 // ===== 載入日期群組長條圖 =====
 async function loadBarChartByDate() {
-    const res = await fetch("/api/orders" + getQueryParams());
+    const res = await fetch("/api/stats/orders_by_date_products" + getQueryParams());
     const data = await res.json();
-    const orders = data.orders || [];
 
-    const { labels, datasets } = processSalesData(orders);
+    const labels = data.labels || [];
+    const datasets = (data.datasets || []).map(d => ({
+        label: d.name,
+        data: d.quantities,
+        backgroundColor: getRandomColor(),
+    }));
+
     const ctx = document.getElementById("barChart");
     if (barChart) barChart.destroy();
 
@@ -97,6 +102,15 @@ async function loadBarChartByDate() {
         }
     });
 }
+
+// ===== 生成隨機顏色 =====
+function getRandomColor() {
+    const r = Math.floor(Math.random() * 200);
+    const g = Math.floor(Math.random() * 200);
+    const b = Math.floor(Math.random() * 200);
+    return `rgb(${r},${g},${b})`;
+}
+
 
 // ===== 切換長條圖模式的安全函數 =====
 async function switchBarMode(mode) {
