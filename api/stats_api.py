@@ -166,3 +166,40 @@ def clear_orders():
 
     result = orders_collection.delete_many(query)
     return jsonify({"deleted_count": result.deleted_count})
+
+# ------------------------
+# 6. 每日訂單數量（長條圖）
+# ------------------------
+@stats_api.route("/api/stats/orders_by_date_products")
+def stats_orders_by_date_products():
+    start = parse_date(request.args.get("start"))
+    end = parse_date(request.args.get("end"))
+    include_pending = request.args.get("include_pending", "false").lower() == "true"
+
+    query = build_query(start, end, include_pending)
+    orders = list(orders_collection.find(query))
+
+    # 找出所有日期
+    all_dates = sorted({order["created_at"].strftime("%Y-%m-%d") for order in orders})
+
+    # 建立 product -> date -> quantity
+    product_sales = defaultdict(lambda: defaultdict(int))
+    for order in orders:
+        date_str = order["created_at"].strftime("%Y-%m-%d")
+        for pid, info in order.get("products", {}).items():
+            product_sales[pid][date_str] += info.get("quantity", 0)
+
+    result = []
+    for pid, date_qty in product_sales.items():
+        try:
+            product = products_collection.find_one({"_id": ObjectId(pid)})
+            name = product["name"] if product else "未知商品"
+        except:
+            name = "未知商品"
+
+        # 對每個日期都填入數量，缺失日期補 0
+        quantities = [date_qty.get(d, 0) for d in all_dates]
+        result.append({"product_id": str(pid), "name": name, "quantities": quantities})
+
+    return jsonify({"labels": all_dates, "datasets": result})
+

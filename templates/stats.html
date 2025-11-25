@@ -7,7 +7,7 @@
 
     <!-- 新增：營業額 + 毛利 -->
     <div class="summary-box">
-        <p><strong>營業額：</strong> <span id="totalRevenue">0</span> 元</p>
+        <p><strong>總營業額：</strong> <span id="totalRevenue">0</span> 元</p>
     </div>
 
     <!-- 開關：包含未完成訂單 -->
@@ -36,9 +36,8 @@
 
     <!-- 圖表切換按鈕 -->
     <div class="chart-switch">
-        <button onclick="showChart('bar')">長條圖</button>
-        <button id="barByProductBtn">依商品累計</button>
-        <button id="barByDateBtn">依日期群組</button>
+        <button id="barByProductBtn">長條圖(依商品累計)</button>
+        <button id="barByDateBtn">長條圖(依日期群組)</button>
         <button onclick="showChart('line')">折線圖</button>
         <button onclick="showChart('pie')">圓餅圖</button>
         <button onclick="exportCSV()">下載 CSV</button>
