@@ -10,6 +10,7 @@ users_collection = db["users"]
 orders_collection = db["orders"] 
 promotions_collection = db["promotions"]
 product_reviews_collection = db["product_reviews"]
+settings_collection = db["settings"]
 
 
 fs = gridfs.GridFS(db)

@@ -1,5 +1,6 @@
 from flask import Blueprint, session, request, jsonify
 from database.db import products_collection  # 商品 collection
+from database.db import settings_collection
 from bson.objectid import ObjectId
 from datetime import datetime, time, timezone   
 import uuid
@@ -11,8 +12,15 @@ cart_bp = Blueprint("cart", __name__)
 def add_to_cart():
     now = datetime.now(timezone.utc).astimezone()
     current_hour = datetime.now().hour
-    if not (6 <= current_hour < 24):
-        return jsonify({"message": "目前非點餐時間 (06:00-24:00)"}), 400
+
+    # 從 DB 取得營業時間
+    store = settings_collection.find_one({"_id": "store_hours"})
+    start_hour = store.get("start", 6) if store else 6
+    end_hour = store.get("end", 24) if store else 24
+
+    # 判斷是否在營業時間
+    if not (start_hour <= current_hour < end_hour):
+        return jsonify({"message": f"目前非點餐時間 ({start_hour:02d}:00-{end_hour:02d}:00)"}), 400
 
     data = request.json
     product_id = str(data.get("product_id"))
