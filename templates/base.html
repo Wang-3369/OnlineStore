@@ -32,6 +32,7 @@
                     <p id="username">使用者：{{ session.get("username") }}</p>
                     <button id="orders-btn">查看訂單</button>
                     <button id="profile-btn">使用者介面</button>
+                    <button id="favorites-btn">我的收藏</button>
 
                     {% if session.get("role") in ["admin", "sub-admin"] %}
                         <hr>

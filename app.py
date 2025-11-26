@@ -11,6 +11,7 @@ from api.description_api import description_bp
 from api.promotions_api import promotion_bp
 from api.stats_api import stats_api
 from api.review_api import review_api
+from api.favorites_api import favorites_bp
 # 導入資料庫 Collection
 from database.db import products_collection, orders_collection, product_reviews_collection
 from dotenv import load_dotenv
@@ -30,6 +31,7 @@ app.register_blueprint(description_bp)
 app.register_blueprint(promotion_bp)
 app.register_blueprint(stats_api)
 app.register_blueprint(review_api)
+app.register_blueprint(favorites_bp)
 
 # ------------------------------
 # 路由設定
@@ -156,6 +158,13 @@ def product_reviews_page():
     if not session.get("username"):
         return redirect("/login")
     return render_template("product_reviews.html")
+
+#收藏頁面
+@app.route("/favorites")
+def favorites_page():
+    if not session.get("username"):
+        return redirect("/login")
+    return render_template("favorites.html")
 
 # 啟動 Flask
 if __name__ == '__main__':
