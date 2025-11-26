@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>我的收藏</h2>
+
+<div class="favorites-container" id="favorites-container">
+    <!-- JS 動態生成商品卡片 -->
+</div>
+
+<script defer src="{{ url_for('static', filename='js/favorites_page.js') }}"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/favorites.css') }}">
+
+{% endblock %}

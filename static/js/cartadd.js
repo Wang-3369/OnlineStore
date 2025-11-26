@@ -62,6 +62,10 @@ async function fetchProducts() {
                 const card = document.createElement("div");
                 card.className = "product-card";
 
+                // 判斷是否已收藏
+                const favClass = p.isFavorite ? 'added' : '';
+                const favText = p.isFavorite ? '取消收藏' : '收藏';
+
                 card.innerHTML = `
                     <a href="/description/${p.id}">
                         <img src="${imgUrl}" alt="${p.name}">
@@ -79,6 +83,7 @@ async function fetchProducts() {
                         data-image="${imgUrl}">
                         加入購物車
                     </button>
+                    <button class="fav-btn ${favClass}" data-id="${p.id}">${favText}</button>
                 `;
                 section.appendChild(card);
             });
@@ -87,6 +92,7 @@ async function fetchProducts() {
         }
 
         bindAddCartButtons();
+        bindFavoriteButtons();
     } catch (e) {
         console.error("抓商品失敗", e);
     }
@@ -158,3 +164,30 @@ async function init() {
 
 document.addEventListener("DOMContentLoaded", init);
 window.addEventListener("resize", adjustSidebarHeight);
+
+// 綁定收藏
+function bindFavoriteButtons() {
+    document.querySelectorAll(".fav-btn").forEach(btn => {
+        btn.onclick = async () => {
+            const productId = btn.dataset.id;
+            const action = btn.classList.contains("added") ? "remove" : "add";
+
+            try {
+                const res = await fetch(`/api/favorites/${action}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ product_id: productId })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    btn.classList.toggle("added");
+                    btn.innerText = btn.classList.contains("added") ? '取消收藏' : '收藏';
+                } else {
+                    alert(data.message);
+                }
+            } catch (err) {
+                console.error("收藏失敗", err);
+            }
+        };
+    });
+}

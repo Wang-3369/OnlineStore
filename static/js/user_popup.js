@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const logoutBtn = document.getElementById('logout-btn');
     const orderBtn = document.getElementById('orders-btn');
     const profileBtn = document.getElementById('profile-btn');
+    const favoritesBtn = document.getElementById("favorites-btn");
 
     // 點擊圖示切換選單
     userIcon.addEventListener('click', (e) => {
@@ -31,9 +32,10 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // 訂單 & 個人介面
+    // 訂單 & 個人介面 & 收藏頁面
     if (orderBtn) orderBtn.addEventListener('click', () => location.href = "/orders");
     if (profileBtn) profileBtn.addEventListener('click', () => location.href = "/profile");
+    if (favoritesBtn)favoritesBtn.addEventListener("click", () => location.href = "/favorites");
 
     // 管理者按鈕統一綁定
     document.querySelectorAll(".admin-btn").forEach(btn => {
