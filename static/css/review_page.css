@@ -1,61 +1,122 @@
+/* ===== 評論頁面容器 ===== */
 .review-page-container {
-    max-width: 900px;
-    margin: auto;
+    max-width: 800px;
+    margin: 30px auto;
     padding: 20px;
+    background: #fff;       /* 整個區塊的白底 */
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
-#review-section {
-    margin-top: 20px;
+/* 標題 */
+.review-page-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #2d3748;
 }
 
+/* 排序與統計區塊 */
+.review-sort, .review-stats {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.review-sort select {
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e0;
+}
+
+/* ===== 單一評論卡片樣式 (關鍵修改) ===== */
 .review-item {
-    padding: 10px 5px;
-    border-bottom: 1px solid #eee;
+    background: #ffffff;
+    border: 2px solid #e2e8f0;  /* 灰色邊框 */
+    border-radius: 12px;        /* 圓角 */
+    padding: 20px;              /* 內距 */
+    margin-bottom: 20px;        /* 每個評論之間的距離 */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); /* 輕微陰影讓卡片浮起來 */
+    transition: all 0.3s ease;
 }
 
+.review-item:hover {
+    border-color: #cbd5e0;      /* 滑鼠移過去時邊框變深一點 */
+    transform: translateY(-2px);
+}
+
+/* 評論頭部 (使用者名稱 + 星星) */
 .review-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    border-bottom: 1px solid #edf2f7; /* 頭部分隔線 */
+    padding-bottom: 10px;
+    margin-bottom: 10px;
 }
 
 .review-header strong {
-    color: #333;
+    font-size: 1.1em;
+    color: #2d3748;
 }
 
 .review-rating {
-    color: #ffcc00;
+    color: #f59e0b; /* 星星顏色 (黃色) */
+    font-size: 1.2em;
+    letter-spacing: 2px;
 }
 
+/* 評論內容 */
+.review-item p {
+    color: #4a5568;
+    line-height: 1.6;
+    margin-bottom: 10px;
+}
+
+/* 時間 */
+.review-item small {
+    display: block;
+    color: #a0aec0;
+    margin-top: 15px;
+    font-size: 0.85em;
+    text-align: right;
+}
+
+/* 管理者回覆區塊 */
 .review-reply {
-    background-color: #f0f0f0;
-    padding: 0.5rem;
-    margin-top: 0.3rem;
-    border-radius: 4px;
+    background: #f7fafc;
+    border-left: 4px solid #667eea;
+    padding: 10px 15px;
+    margin-top: 10px;
+    border-radius: 0 8px 8px 0;
+    font-size: 0.95em;
+    color: #2d3748;
 }
 
-.delete-btn, .reply-btn {
-    margin-top: 0.3rem;
-    margin-right: 5px;
-    padding: 5px 10px;
+/* 按鈕樣式 (刪除/回覆) */
+.review-item button {
+    padding: 6px 12px;
+    margin-top: 10px;
+    margin-right: 10px;
     border: none;
-    border-radius: 4px;
+    border-radius: 6px;
     cursor: pointer;
-    color: #fff;
+    font-size: 0.9em;
+    transition: background 0.3s;
 }
 
-.delete-btn {
-    background-color: #e74c3c;
+/* 刪除按鈕 - 紅色系 */
+.review-item button.delete-btn {
+    background: #fed7d7;
+    color: #c53030;
+}
+.review-item button.delete-btn:hover {
+    background: #feb2b2;
 }
 
-.delete-btn:hover {
-    background-color: #c0392b;
+/* 回覆按鈕 - 藍色系 */
+.review-item button.reply-btn {
+    background: #e2e8f0;
+    color: #4a5568;
 }
-
-.reply-btn {
-    background-color: #3498db;
-}
-
-.reply-btn:hover {
-    background-color: #2980b9;
+.review-item button.reply-btn:hover {
+    background: #cbd5e0;
 }

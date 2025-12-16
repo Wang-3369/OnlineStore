@@ -1,30 +1,32 @@
 {% extends "base.html" %}
 {% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
 
 <div class="login-container">
+    <h2>登入</h2>
 
-<h2>登入</h2>
+    <form id="login-form">
+        <label>
+            帳號
+            <input type="text" name="username" placeholder="請輸入帳號" required>
+        </label>
 
-<form id="login-form">
-    <label>帳號：
-        <input type="text" name="username" required>
-    </label>
+        <label>
+            密碼
+            <input type="password" name="password" placeholder="請輸入密碼" required>
+        </label>
 
-    <label>密碼：
-        <input type="password" name="password" required>
-    </label>
+        <button type="submit">登入</button>
+    </form>
 
-    <button type="submit">登入</button>
-</form>
+    <p>還沒有帳號？<a href="/register">立即註冊</a></p>
 
-<p>還沒有帳號？<a href="/register">立即註冊</a></p>
+    <div class="divider">或</div>
 
-<p>或使用 Google 登入：</p>
-
-<a class="google-login-btn" href="{{ url_for('auth.login_google') }}">
-  <img src="https://developers.google.com/identity/images/btn_google_signin_dark_normal_web.png" alt="Google Login">
-</a>
-
+    <p>使用 Google 登入：</p>
+    <a class="google-login-btn" href="{{ url_for('auth.login_google') }}">
+        <img src="https://developers.google.com/identity/images/btn_google_signin_dark_normal_web.png" alt="Google Login">
+    </a>
 </div>
 
 <script defer src="{{ url_for('static', filename='js/login.js') }}"></script>
