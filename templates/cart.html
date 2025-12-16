@@ -1,35 +1,36 @@
 {% extends "base.html" %}
 {% block content %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/cart.css') }}">
-<h2>購物車</h2>
 
-<table border="1" cellpadding="5">
-    <thead>
-        <tr>
-            <th>商品名稱</th>
-            <th>單價</th>
-            <th>數量</th>
-            <th>小計</th>
-            <th>操作</th>
-        </tr>
-    </thead>
-    <tbody id="cart-body"></tbody>
-</table>
+<div class="cart-container">
+    <h2>購物車</h2>
 
-<p id="total-price"></p>
+    <table border="1" cellpadding="5">
+        <thead>
+            <tr>
+                <th>商品名稱</th>
+                <th>單價</th>
+                <th>數量</th>
+                <th>小計</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody id="cart-body"></tbody>
+    </table>
 
-<div style="margin: 20px 0;">
-    <label for="pickup-time">預定取餐時間：</label>
-    <input type="time" id="pickup-time" required>
+    <p id="total-price" style="font-size: 1.2em; font-weight: bold; margin: 20px 0; text-align: right;">總計：NT$ 0</p>
+
+    <div style="margin: 20px 0;">
+        <label for="pickup-time">預定取餐時間：</label>
+        <input type="time" id="pickup-time" required>
+    </div>
+
+    <div style="margin: 20px 0;">
+        <label for="order-note">備註：</label><br>
+        <textarea id="order-note" rows="3" style="width: 100%;" placeholder="例如：少冰、不辣、不要香菜"></textarea>
+    </div>
+
+    <button id="checkout-btn">結帳</button>
 </div>
-
-<!--備註欄位 -->
-<div style="margin: 20px 0;">
-    <label for="order-note">備註：</label><br>
-    <textarea id="order-note" rows="3" style="width: 100%;" placeholder="例如：少冰、不辣、不要香菜"></textarea>
-</div>
-
-<button id="checkout-btn">結帳</button>
-
 <script src="{{ url_for('static', filename='js/cart.js') }}"></script>
 {% endblock %}
