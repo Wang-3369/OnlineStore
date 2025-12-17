@@ -1,16 +1,17 @@
 from flask import Blueprint, session, request, jsonify
 from database.db import products_collection  # 商品 collection
 from bson.objectid import ObjectId
-from datetime import datetime, time, timezone   
+from datetime import datetime, timedelta, timezone
 import uuid
 
 cart_bp = Blueprint("cart", __name__)
 
+tw_tz = timezone(timedelta(hours=8))
+
 # 加入購物車
 @cart_bp.route("/api/cart/add", methods=["POST"])
 def add_to_cart():
-    now = datetime.now(timezone.utc).astimezone()
-    current_hour = datetime.now().hour
+    current_hour = datetime.now(tw_tz).hour
     if not (6 <= current_hour < 24):
         return jsonify({"message": "目前非點餐時間 (06:00-24:00)"}), 400
 
@@ -36,7 +37,8 @@ def add_to_cart():
         cart[product_id] = {
             "name": product["name"],
             "price": product["price"],
-            "quantity": quantity
+            "quantity": quantity,
+            "image_id": str(product.get("image_id", ""))
         }
     session["cart"] = cart
     return jsonify({"message": f"{product['name']} 已加入購物車", "cart": cart})
@@ -95,16 +97,16 @@ def checkout():
 
     # === 1. 結帳前先檢查庫存 ===
     for product_id, item in cart.items():
-        product = products_collection.find_one({"_id": ObjectId(product_id)})
-        if not product:
-            return jsonify({"message": f"商品 {item['name']} 不存在"}), 400
-
-        if product["stock"] < item["quantity"]:
-            return jsonify({
-                "message": f"商品「{item['name']}」庫存不足",
-                "stock": product["stock"],
-                "need": item["quantity"]
-            }), 400
+        result = products_collection.update_one(
+            {
+                "_id": ObjectId(product_id), 
+                "stock": {"$gte": item["quantity"]}
+            },
+            {"$inc": {"stock": -item["quantity"]}}
+        )
+        
+        if result.modified_count == 0:
+            return jsonify({"message": f"商品 {item['name']} 剛好被搶光了！"}), 400
 
     # === 2. 庫存足夠 → 逐筆扣庫存 ===
     for product_id, item in cart.items():

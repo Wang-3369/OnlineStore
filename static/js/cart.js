@@ -8,8 +8,9 @@ function renderCart(cart) {
         total += subtotal;
 
         const tr = document.createElement("tr");
+        const imgHtml = item.image_id ? `<img src="/api/products/image/${item.image_id}" width="50">` : '';
         tr.innerHTML = `
-            <td>${item.name}</td>
+            <td>${imgHtml} ${item.name}</td>
             <td>${item.price}</td>
             <td>
                 <input type="number" value="${item.quantity}" min="1" onchange="updateCart('${id}', this.value)">
