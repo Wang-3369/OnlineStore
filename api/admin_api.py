@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify, session
 from database.db import users_collection, orders_collection,products_collection
 from bson.objectid import ObjectId
+from utils.sse import announcer, format_sse
 
 admin_bp = Blueprint("admin", __name__)
 
@@ -113,13 +114,19 @@ def update_order_status():
                 {"$inc": {"stock": item["quantity"]}}
             )
 
-    # 更新訂單狀態
-    result = orders_collection.update_one(
+    orders_collection.update_one(
         {"order_id": order_id},
         {"$set": {"status": new_status}}
     )
 
-    if result.modified_count > 0:
-        return jsonify({"message": f"訂單狀態已更新為 {new_status}"})
-    else:
-        return jsonify({"message": "訂單狀態更新失敗"}), 400
+    # 更新訂單狀態
+    username = order["username"] # 取得訂單歸屬者
+    
+    msg_payload = json.dumps({
+        "order_id": order_id,
+        "status": new_status,
+        "username": username  # 前端可判斷是否為自己的訂單
+    })
+    announcer.announce(format_sse(data=msg_payload, event="order_update"))
+    
+    return jsonify({"message": "更新成功"})

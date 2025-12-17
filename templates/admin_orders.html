@@ -10,6 +10,14 @@
 </div>
 
 <script>
+const evtSource = new EventSource("/events");
+
+evtSource.addEventListener("new_order", function(e) {
+    const data = JSON.parse(e.data);
+    alert(`🔔 新訂單來了！\n編號：${data.order_id}\n金額：$${data.total}`);
+    location.reload();
+});
+
 async function fetchOrders() {
     const res = await fetch("/api/admin/orders");
     const orders = await res.json();
@@ -88,8 +96,12 @@ async function updateStatus(orderId, status) {
         body: JSON.stringify({ order_id: orderId, status: status })
     });
     const result = await res.json();
-    alert(result.message);
-    fetchOrders();
+    if (res.ok) {
+        location.reload();
+    } else {
+        const result = await res.json();
+        alert("更新失敗：" + result.message);
+    }
 }
 
 // 頁面載入後執行
