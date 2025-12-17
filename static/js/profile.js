@@ -1,126 +1,52 @@
-document.addEventListener("DOMContentLoaded", () => {
-    const avatarInput = document.getElementById("avatar-input");
-    const cropModal = document.getElementById("crop-modal");
-    const imageToCrop = document.getElementById("image-to-crop");
-    const cropBtn = document.getElementById("crop-upload-btn");
-    const cancelBtn = document.getElementById("crop-cancel-btn");
-    let cropper = null;
+const avatarImg = document.getElementById("avatar-img");
 
-    // ===== 1. 當使用者選擇檔案時 =====
-    if (avatarInput) {
-        avatarInput.addEventListener("change", (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
+const uploadBtn = document.getElementById("upload-avatar");
+if (uploadBtn) {
+    uploadBtn.onclick = async () => {
+        const file = document.getElementById("avatar-input").files[0];
+        if (!file) return alert("請選擇檔案");
 
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                imageToCrop.src = event.target.result;
-                cropModal.style.display = "flex";
+        const form = new FormData();
+        form.append("avatar", file);
 
-                if (cropper) {
-                    cropper.destroy();
-                }
+        const res = await fetch("/api/profile/avatar", { method: "POST", body: form });
+        const data = await res.json();
+        alert(data.message);
 
-                // 初始化 Cropper
-                cropper = new Cropper(imageToCrop, {
-                    aspectRatio: 1,      // 限制裁切比例為 1:1 (正方形/圓形)
-                    viewMode: 1,
-                    dragMode: 'move',
-                    autoCropArea: 0.8,
-                    restore: false,
-                    guides: true,
-                    center: true,
-                    highlight: false,
-                    cropBoxMovable: true,
-                    cropBoxResizable: true,
-                    toggleDragModeOnDblclick: false,
-                });
-            };
-            reader.readAsDataURL(file);
-            
-            e.target.value = ''; 
-        });
-    }
-
-    // ===== 2. 取消裁切 =====
-    if (cancelBtn) {
-        cancelBtn.addEventListener("click", () => {
-            cropModal.style.display = "none";
-            if (cropper) cropper.destroy();
-        });
-    }
-
-    // ===== 3. 確認裁切並上傳 =====
-    if (cropBtn) {
-        cropBtn.addEventListener("click", () => {
-            if (!cropper) return;
-
-            cropper.getCroppedCanvas({
-                width: 300,
-                height: 300,
-                fillColor: '#fff',
-                imageSmoothingEnabled: true,
-                imageSmoothingQuality: 'high',
-            }).toBlob(async (blob) => {
-                const formData = new FormData();
-                formData.append("avatar", blob, "avatar.jpg");
-
-                try {
-                    cropBtn.textContent = "上傳中...";
-                    cropBtn.disabled = true;
-
-                    const res = await fetch("/api/profile/avatar", {
-                        method: "POST",
-                        body: formData
-                    });
-                    const data = await res.json();
-
-                    alert(data.message);
-                    if (res.ok) {
-                        location.reload();
-                    } else {
-                        cropBtn.textContent = "確認裁切並上傳";
-                        cropBtn.disabled = false;
-                    }
-                } catch (err) {
-                    console.error("上傳失敗", err);
-                    alert("上傳發生錯誤");
-                    cropBtn.textContent = "確認裁切並上傳";
-                    cropBtn.disabled = false;
-                }
-            }, 'image/jpeg', 0.9);
-        });
-    }
+        if (res.ok) {
+            // 上傳成功後直接刷新頁面
+            location.reload();
+        }
+    };
+}
 
 
-    const changePwBtn = document.getElementById("change-password");
-    if(changePwBtn) {
-        changePwBtn.onclick = async () => {
-            const old_pw = document.getElementById("old-password").value;
-            const new_pw = document.getElementById("new-password").value;
+document.getElementById("change-password").onclick = async () => {
+    const old_pw = document.getElementById("old-password").value;
+    const new_pw = document.getElementById("new-password").value;
 
-            const res = await fetch("/api/profile/change_password", {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({old_password: old_pw, new_password: new_pw})
-            });
-            const data = await res.json();
-            alert(data.message);
-        };
-    }
+    const res = await fetch("/api/profile/change_password", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({old_password: old_pw, new_password: new_pw})
+    });
+    const data = await res.json();
+    alert(data.message);
+};
 
-    const deleteBtn = document.getElementById("delete-avatar");
-    if (deleteBtn) {
-        deleteBtn.onclick = async () => {
-            if (!confirm("確定要刪除自訂頭像嗎？")) return;
+const deleteBtn = document.getElementById("delete-avatar");
+if (deleteBtn) {
+    deleteBtn.onclick = async () => {
+        if (!confirm("確定要刪除自訂頭像嗎？")) return;
 
-            const res = await fetch("/api/profile/delete_avatar", { method: "POST" });
-            const data = await res.json();
-            alert(data.message);
+        const res = await fetch("/api/profile/delete_avatar", { method: "POST" });
+        const data = await res.json();
+        alert(data.message);
 
-            if (res.ok) {
-                window.location.reload();
-            }
-        };
-    }
-});
+        if (res.ok) {
+            // 刪除後顯示 Google 頭像或預設圖片
+            window.location.reload();
+        }
+    };
+}
+

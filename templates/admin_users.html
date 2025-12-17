@@ -1,23 +1,15 @@
 {% extends "base.html" %}
 {% block content %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/admin_users.css') }}">
-
-<div class="admin-users-container">
-    <h2>管理後台 - 使用者管理</h2>
-    
-    <div class="users-table-container">
-        <table>
-            <thead>
-                <tr>
-                    <th>帳號</th>
-                    <th>角色</th>
-                    <th>操作</th>
-                </tr>
-            </thead>
-            <tbody id="user-list"></tbody>
-        </table>
-    </div>
-</div>
-
+<h2>管理後台 - 使用者管理</h2>
+<table border="1" cellpadding="5">
+    <thead>
+        <tr>
+            <th>帳號</th>
+            <th>角色</th>
+            <th>操作</th>
+        </tr>
+    </thead>
+    <tbody id="user-list"></tbody>
+</table>
 <script defer src="{{ url_for('static', filename='js/admin_users.js') }}"></script>
 {% endblock %}

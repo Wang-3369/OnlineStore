@@ -54,9 +54,6 @@ async function fetchProducts() {
             h3.innerText = cat;
             section.appendChild(h3);
 
-            const gridContainer = document.createElement("div");
-            gridContainer.classList.add("product-list");
-
             grouped[cat].forEach(p => {
                 const imgUrl = p.image_id
                     ? `/api/products/image/${p.image_id}`
@@ -88,9 +85,9 @@ async function fetchProducts() {
                     </button>
                     <button class="fav-btn ${favClass}" data-id="${p.id}">${favText}</button>
                 `;
-                gridContainer.appendChild(card);
+                section.appendChild(card);
             });
-            section.appendChild(gridContainer);
+
             container.appendChild(section);
         }
 
