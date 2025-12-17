@@ -101,3 +101,23 @@ document.addEventListener("DOMContentLoaded", async () => {
         document.getElementById("review-modal").style.display = "none";
     });
 });
+
+const evtSource = new EventSource("/events");
+
+evtSource.addEventListener("order_update", function(e) {
+    const data = JSON.parse(e.data);
+    const currentUser = "{{ session.get('username') }}"; // 需在 HTML 模板中取得
+
+    // 只更新自己的訂單
+    if (data.username === currentUser) {
+        // 1. 簡單提示
+        alert(`你的訂單 ${data.order_id} 狀態已更新為：${data.status}`);
+        
+        // 2. 或直接修改 DOM (進階)
+        const orderBlock = document.querySelector(`.order-block h3:contains('${data.order_id}')`)?.closest('.order-block');
+        if (orderBlock) {
+             // 更新狀態文字或顏色
+             location.reload(); // 最簡單的方式：直接重整
+        }
+    }
+});
