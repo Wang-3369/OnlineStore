@@ -101,6 +101,28 @@ async function fetchProducts() {
     }
 }
 
+document.getElementById("product-search")?.addEventListener("input", (e) => {
+    const keyword = e.target.value.toLowerCase();
+    const cards = document.querySelectorAll(".product-card");
+    const categories = document.querySelectorAll(".product-category");
+
+    cards.forEach(card => {
+        const name = card.querySelector("h3").innerText.toLowerCase();
+        card.style.display = name.includes(keyword) ? "block" : "none";
+    });
+
+    // 進階優化：如果某分類下的所有商品都被隱藏，則隱藏該分類標題
+    categories.forEach(cat => {
+        const visibleProducts = cat.querySelectorAll(".product-card[style='display: block;']");
+        const allCards = cat.querySelectorAll(".product-card");
+        let hasVisible = false;
+        allCards.forEach(c => {
+            if (c.style.display !== 'none') hasVisible = true;
+        });
+        cat.style.display = hasVisible ? "block" : "none";
+    });
+});
+
 // 綁定加入購物車
 function bindAddCartButtons() {
     document.querySelectorAll(".add-cart-btn").forEach(btn => {

@@ -1,0 +1,38 @@
+/* 進度條樣式 */
+.progress-track {
+    display: flex;
+    margin: 20px 0;
+    position: relative;
+    justify-content: space-between;
+}
+.progress-track::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: #e0e0e0;
+    z-index: 0;
+    transform: translateY(-50%);
+}
+.step {
+    background: #fff;
+    z-index: 1;
+    padding: 5px 15px;
+    border-radius: 20px;
+    border: 2px solid #e0e0e0;
+    color: #999;
+    font-size: 0.9em;
+    font-weight: bold;
+}
+.step.active {
+    border-color: #667eea;
+    color: #667eea;
+    background: #eef2ff;
+}
+.step.completed {
+    border-color: #48bb78;
+    color: white;
+    background: #48bb78;
+}
