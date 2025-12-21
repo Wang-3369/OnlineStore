@@ -1,14 +1,30 @@
-/* ===== 促銷輪播區容器 ===== */
+/* 全域設定 */
+body {
+    background-color: #f8f9fa;
+    font-family: "Noto Sans TC", sans-serif;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+/* ===== 促銷輪播區 ===== */
+/* 促銷輪播容器：確保它能根據內容伸縮 */
 .promo-slider-container {
-    width: 100%;
-    max-width: 1200px;
-    height: 400px;
-    margin: 20px auto;
+    width: 85% !important;        /* 寬度佔頁面的 85% */
+    max-width: 900px !important;  /* 限制最大寬度，避免在大螢幕拉得太長 */
+    height: 300px !important;     /* 固定高度 */
+    margin: 40px auto !important; /* 置中並增加上下留白 */
+    
+    /* 重置 main > * 可能帶來的多餘內距 */
+    padding: 0 !important;        
+    overflow: hidden;
     position: relative;
     overflow: hidden;
     border-radius: 20px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-    background: #fff;
+    
+    /* 為了讓留白好看，背景設為透明或與網頁一致，或保持白色 */
+    background: rgba(255, 255, 255, 0.9) !important; 
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15) !important;
 }
 
 /* ===== 輪播軌道 (Flexbox 橫向排列) ===== */
@@ -21,11 +37,17 @@
 
 /* ===== 圖片本體 ===== */
 .promo-slider img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
+    width: 100%;                  /* 寬度配合容器 */
+    height: 100%;                 /* 高度配合容器 */
     flex-shrink: 0;
-    display: block;
+    
+    /* 核心邏輯：圖片縮小顯示，不被裁切 */
+    object-fit: contain;          
+    
+    /* 圖片內留白：讓圖片看起來縮小在框格內 */
+    padding: 20px;                
+    box-sizing: border-box;
+    background: transparent;
 }
 
 /* ===== 左右切換按鈕 ===== */
@@ -42,8 +64,14 @@
     font-size: 1.5em;
     border-radius: 50%;
     z-index: 10;
-    transition: all 0.3s ease;
-    backdrop-filter: blur(5px);
+    backdrop-filter: blur(8px);
+    transition: all 0.3s;
+    opacity: 0; /* 預設隱藏 */
+}
+
+.promo-slider-container:hover button.prev,
+.promo-slider-container:hover button.next {
+    opacity: 1;
 }
 
 .promo-slider-container button.prev { left: 20px; }
@@ -77,14 +105,15 @@
 
 .dots span.active {
     background: #fff;
-    transform: scale(1.2);
+    width: 25px; /* 拉長效果 */
+    border-radius: 10px;
 }
 
 .main-container {
     display: flex;
     max-width: 1400px;
-    margin: 0 auto;
-    padding: 20px;
+    margin: 40px auto;
+    padding: 0 20px;
     gap: 30px;
     align-items: flex-start;
 }
@@ -133,9 +162,6 @@
 /* 右側商品列表容器 */
 .product-list-container {
     flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 40px;
 }
 
 .product-category h3 {
@@ -152,10 +178,76 @@
     gap: 25px;
 }
 
-/* RWD 響應式調整 */
+/* 商品卡片 */
+.product-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+    transition: all 0.3s ease;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+}
+
+.product-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+}
+
+.product-card img {
+    width: 100%;
+    aspect-ratio: 1/1;
+    object-fit: cover;
+    border-radius: 12px;
+    margin-bottom: 15px;
+}
+
+.product-card h3 {
+    font-size: 1.1rem;
+    margin: 5px 0;
+    height: 2.4em; /* 限制兩行 */
+    overflow: hidden;
+}
+
+.product-card p.price {
+    color: #e74c3c;
+    font-weight: 800;
+    font-size: 1.3rem;
+    margin: 10px 0;
+}
+
+.add-cart-btn {
+    width: 100%;
+    padding: 12px;
+    background: #2d3436;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.add-cart-btn:hover {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* ===== 響應式調整 ===== */
 @media (max-width: 900px) {
+    .promo-slider-container {
+        width: 92% !important;
+        height: 200px !important; /* 手機版高度縮小 */
+        margin: 20px auto !important;
+    }
+    .promo-slider img {
+        padding: 10px;            /* 手機版內縮小一點 */
+    }
+    
     .main-container {
         flex-direction: column;
+        padding: 0 10px; /* 🔧 手機版減少左右 padding */
     }
     
     .category-sidebar {
@@ -177,35 +269,6 @@
     #category-list button {
         width: auto;
         white-space: nowrap;
-        margin: 0;
+        margin-bottom: 0;
     }
-
-    .promo-slider-container {
-        height: 250px;
-    }
-}
-
-.product-card {
-    position: relative;
-    overflow: hidden;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.product-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.15);
-}
-
-.product-card::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
-    opacity: 0;
-    transition: opacity 0.3s;
-    pointer-events: none;
-}
-
-.product-card:hover::after {
-    opacity: 1;
 }
