@@ -152,7 +152,7 @@ openBtn?.addEventListener("click", async () => {
     }
 
     // 先打開彈窗，讓使用者看到在動
-    modal.style.display = "block";
+    modal.style.display = "flex";
     document.getElementById("modal-total-display").innerText = "計算折扣中...";
 
     try {
