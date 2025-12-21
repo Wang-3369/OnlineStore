@@ -737,3 +737,52 @@ main > * {
     top: 0px;
     right: 0px;
 }
+
+/* 容器佈局 */
+#orders-container {
+    display: flex;
+    flex-direction: column;
+    gap: 30px; /* 增加訂單之間的巨大間距 */
+    padding: 20px;
+}
+
+/* 訂單卡片化設計 */
+.order-card {
+    background: #ffffff;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12); /* 強化陰影 */
+    border-left: 10px solid #ddd; /* 側邊狀態條 */
+    transition: transform 0.2s;
+}
+
+/* 狀態顏色條區分 */
+.order-card.status-pending { border-left-color: #f39c12; }  /* 待接單：橘色 */
+.order-card.status-accepted { border-left-color: #3498db; } /* 製作中：藍色 */
+.order-card.status-completed { border-left-color: #2ecc71; opacity: 0.8; } /* 已完成：綠色清淡化 */
+
+/* 標題與資訊排版 */
+.order-card h3 {
+    margin: 0;
+    font-size: 1.4rem;
+    color: #333;
+    border-bottom: 2px solid #f4f4f4;
+    padding-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+}
+
+/* 商品清單區塊：讓它像是一張發票 */
+.order-card ul {
+    background: #f9f9f9;
+    border-radius: 10px;
+    padding: 15px 40px;
+    margin: 15px 0;
+    border: 1px solid #eee;
+    list-style: decimal;
+}
+
+.order-card li {
+    padding: 5px 0;
+    font-weight: 500;
+}
