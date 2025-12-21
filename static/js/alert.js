@@ -1,34 +1,33 @@
+// --- 全域資源初始化 ---
+const alertAudio = new Audio("/static/audio/alert.mp3");
 
-    // --- 全域資源初始化 ---
-    const alertAudio = new Audio("/static/audio/alert.mp3");
+/**
+ * 封裝 SSE 連線邏輯，避免斷線時全網頁 reload 導致伺服器癱瘓
+ */
+function setupSSE() {
+    const currentUser = document.body.dataset.username;
+    const userRole = document.body.dataset.role;
 
-    document.addEventListener("DOMContentLoaded", () => {
-        const currentUser = document.body.dataset.username;
-        const userRole = document.body.dataset.role; 
-        console.log("當前使用者身分:", userRole);
-        if (!currentUser) return; 
+    if (!currentUser) return;
 
-        const globalSource = new EventSource("/events");
+    console.log("正在建立 SSE 連線...");
+    const globalSource = new EventSource("/events");
 
-        // 輔助函式：顯示紅點 (增加目標參數)
-        const showDot = (targetId) => {
-            // 1. 先顯示外層頭像的紅點 (讓使用者知道有通知)
-            document.getElementById("user-container")?.classList.add("notification-dot");
-            
-            // 2. 顯示選單內具體按鈕的紅點
-            if (targetId) {
-                const btn = document.querySelector(`button[data-url="${targetId}"]`) || document.getElementById(targetId);
-                btn?.classList.add("notification-dot");
-            }
-        };
+    // 1. 處理心跳與一般訊息
+    globalSource.onmessage = function(e) {
+        if (e.data === "heartbeat") {
+            console.log("SSE 心跳正常");
+            return;
+        }
+    };
 
-        // --- A. 監聽：訂單狀態更新 (個人下單 -> 點亮「查看訂單」) ---
-        globalSource.addEventListener("order_update", function(e) {
+    // 2. 監聽：訂單狀態更新 (個人通知)
+    globalSource.addEventListener("order_update", function(e) {
+        try {
             const data = JSON.parse(e.data);
             if (data.username && data.username.trim() === currentUser.trim()) {
-                // 顯示頭像紅點 + 「查看訂單」按鈕紅點
-                showDot("orders-btn");
-                
+                showNotificationDot("orders-btn");
+
                 if (window.location.pathname === "/orders") {
                     alert(`您的訂單 ${data.order_id} 狀態已更新為：${data.status}`);
                     location.reload();
@@ -36,51 +35,72 @@
                     alert(`[個人訂單通知] 您的訂單狀態已更新！`);
                 }
             }
-        });
+        } catch (err) {
+            console.error("解析 order_update 失敗", err);
+        }
+    });
 
-        // --- B. 監聽：新訂單進來 (管理者接單 -> 點亮「接單系統」) ---
-        globalSource.addEventListener("new_order", function(e) {
-            if (userRole === "admin" || userRole === "sub-admin") {
+    // 3. 監聽：新訂單 (管理者通知)
+    globalSource.addEventListener("new_order", function(e) {
+        if (userRole === "admin" || userRole === "sub-admin") {
+            try {
                 const data = JSON.parse(e.data);
-
+                // 排除自己下的測試單通知
                 if (data.username !== currentUser) {
-                    // 1. 顯示紅點引導
-                    showDot("/admin/orders"); 
+                    showNotificationDot("/admin/orders");
+                    
+                    // 播放音效
+                    alertAudio.play().catch(() => console.log("音效自動播放被瀏覽器阻擋"));
 
-                    // 2. 嘗試播放聲音
-                    const playAttempt = alertAudio.play();
-
-                    if (playAttempt !== undefined) {
-                        playAttempt.then(() => {
-                            console.log("音效播放成功");
-                        }).catch(error => {
-                            console.log("自動播放被阻擋，將透過 alert 引導使用者互動");
-                        });
-                    }
-
-                    // 3. 跳出警告視窗 (這會阻塞畫面，強制使用者點擊)
                     if (typeof fetchOrders === "function") {
-                        // 如果在接單頁面，直接更新列表並提示
-                        fetchOrders();
+                        fetchOrders(); // 如果在管理頁面就更新列表
                         alert(`【新訂單通知】您有一筆新訂單！單號：#${data.order_id}`);
                     } else {
-                        // 如果在其他頁面，單純提示
                         alert(`[店務通知] 有新訂單來了！單號：#${data.order_id}`);
                     }
                 }
+            } catch (err) {
+                console.error("解析 new_order 失敗", err);
             }
-        });
-
-        // --- 點擊處理：移除紅點 ---
-        // 1. 點擊頭像時，只移除「頭像外層」的紅點，保留選單內的紅點引導使用者點擊
-        document.getElementById("user-icon")?.addEventListener("click", () => {
-            document.getElementById("user-container")?.classList.remove("notification-dot");
-        });
-
-        // 2. 點擊特定按鈕時，移除該按鈕的紅點
-        document.querySelectorAll(".notification-dot").forEach(el => {
-            el.addEventListener("click", function() {
-                this.classList.remove("notification-dot");
-            });
-        });
+        }
     });
+
+    // 4. 錯誤處理：連線斷開時不要 reload 頁面，而是重新連線 SSE
+    globalSource.onerror = function() {
+        console.warn("SSE 連線中斷，5秒後嘗試背景重連...");
+        globalSource.close();
+        setTimeout(setupSSE, 5000); // 治本：只重連線，不重整網頁
+    };
+}
+
+/**
+ * 顯示紅點提醒
+ */
+function showNotificationDot(targetId) {
+    // 顯示頭像外層紅點
+    document.getElementById("user-container")?.classList.add("notification-dot");
+    
+    // 顯示選單內按鈕紅點
+    const btn = document.querySelector(`button[data-url="${targetId}"]`) || document.getElementById(targetId);
+    btn?.classList.add("notification-dot");
+}
+
+/**
+ * 頁面載入後初始化
+ */
+document.addEventListener("DOMContentLoaded", () => {
+    // 啟動 SSE
+    setupSSE();
+
+    // 綁定點擊事件：移除紅點
+    document.getElementById("user-icon")?.addEventListener("click", () => {
+        document.getElementById("user-container")?.classList.remove("notification-dot");
+    });
+
+    // 委派點擊事件給所有紅點按鈕
+    document.addEventListener("click", (e) => {
+        if (e.target.classList.contains("notification-dot")) {
+            e.target.classList.remove("notification-dot");
+        }
+    });
+});
