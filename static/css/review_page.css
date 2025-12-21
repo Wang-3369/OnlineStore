@@ -1,7 +1,7 @@
-/* promotions.css */
+/* promotions.css - 促銷活動管理 */
 .promo-admin-container {
     max-width: 800px;
-    margin: 20px auto;
+    margin: 30px auto;
     padding: 20px;
     background: #f9f9f9;
     border-radius: 12px;
@@ -9,37 +9,46 @@
 
 .upload-box {
     background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
     margin-bottom: 30px;
 }
 
 .form-group {
-    margin-bottom: 15px;
+    margin-bottom: 20px;
 }
 
 .form-group label {
     display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #2d3748;
 }
 
 .form-group input, .form-group select {
     width: 100%;
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+    padding: 10px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-sizing: border-box;
 }
 
+/* 促銷項目清單 */
 .promo-item {
     display: flex;
     align-items: center;
     background: white;
     padding: 15px;
-    margin-bottom: 10px;
-    border-radius: 8px;
+    margin-bottom: 12px;
+    border-radius: 10px;
     border-left: 5px solid #ff6600;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+    transition: transform 0.2s;
+}
+
+.promo-item:hover {
+    transform: translateX(5px);
 }
 
 .promo-item img {
@@ -47,21 +56,26 @@
     height: 70px;
     object-fit: cover;
     margin-right: 20px;
-    border-radius: 4px;
+    border-radius: 6px;
+    background: #eee;
 }
 
 .promo-info {
     flex-grow: 1;
 }
 
-.promo-info h4 { margin: 0; color: #333; }
-.promo-info p { margin: 5px 0; font-size: 0.9em; color: #666; }
+.promo-info h4 { margin: 0; color: #1a202c; font-size: 1.1em; }
+.promo-info p { margin: 4px 0; font-size: 0.9em; color: #718096; }
 
 .delete-btn {
     background: #ff4757;
     color: white;
     border: none;
-    padding: 8px 15px;
-    border-radius: 4px;
+    padding: 8px 16px;
+    border-radius: 6px;
     cursor: pointer;
+    font-weight: 600;
+    transition: background 0.2s;
 }
+
+.delete-btn:hover { background: #ff2e44; }

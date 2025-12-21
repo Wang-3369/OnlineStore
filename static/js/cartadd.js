@@ -54,6 +54,9 @@ async function fetchProducts() {
             h3.innerText = cat;
             section.appendChild(h3);
 
+            const gridContainer = document.createElement("div");
+            gridContainer.classList.add("product-list");
+
             grouped[cat].forEach(p => {
                 const imgUrl = p.image_id
                     ? `/api/products/image/${p.image_id}`
@@ -61,6 +64,10 @@ async function fetchProducts() {
 
                 const card = document.createElement("div");
                 card.className = "product-card";
+
+                // 判斷是否已收藏
+                const favClass = p.isFavorite ? 'added' : '';
+                const favText = p.isFavorite ? '取消收藏' : '收藏';
 
                 card.innerHTML = `
                     <a href="/description/${p.id}">
@@ -79,18 +86,42 @@ async function fetchProducts() {
                         data-image="${imgUrl}">
                         加入購物車
                     </button>
+                    <button class="fav-btn ${favClass}" data-id="${p.id}">${favText}</button>
                 `;
-                section.appendChild(card);
+                gridContainer.appendChild(card);
             });
-
+            section.appendChild(gridContainer);
             container.appendChild(section);
         }
 
         bindAddCartButtons();
+        bindFavoriteButtons();
     } catch (e) {
         console.error("抓商品失敗", e);
     }
 }
+
+document.getElementById("product-search")?.addEventListener("input", (e) => {
+    const keyword = e.target.value.toLowerCase();
+    const cards = document.querySelectorAll(".product-card");
+    const categories = document.querySelectorAll(".product-category");
+
+    cards.forEach(card => {
+        const name = card.querySelector("h3").innerText.toLowerCase();
+        card.style.display = name.includes(keyword) ? "block" : "none";
+    });
+
+    // 進階優化：如果某分類下的所有商品都被隱藏，則隱藏該分類標題
+    categories.forEach(cat => {
+        const visibleProducts = cat.querySelectorAll(".product-card[style='display: block;']");
+        const allCards = cat.querySelectorAll(".product-card");
+        let hasVisible = false;
+        allCards.forEach(c => {
+            if (c.style.display !== 'none') hasVisible = true;
+        });
+        cat.style.display = hasVisible ? "block" : "none";
+    });
+});
 
 // 綁定加入購物車
 function bindAddCartButtons() {
@@ -158,3 +189,30 @@ async function init() {
 
 document.addEventListener("DOMContentLoaded", init);
 window.addEventListener("resize", adjustSidebarHeight);
+
+// 綁定收藏
+function bindFavoriteButtons() {
+    document.querySelectorAll(".fav-btn").forEach(btn => {
+        btn.onclick = async () => {
+            const productId = btn.dataset.id;
+            const action = btn.classList.contains("added") ? "remove" : "add";
+
+            try {
+                const res = await fetch(`/api/favorites/${action}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ product_id: productId })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    btn.classList.toggle("added");
+                    btn.innerText = btn.classList.contains("added") ? '取消收藏' : '收藏';
+                } else {
+                    alert(data.message);
+                }
+            } catch (err) {
+                console.error("收藏失敗", err);
+            }
+        };
+    });
+}

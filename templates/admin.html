@@ -1,31 +1,39 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>管理後台 - 商品管理</h2>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
 
-<!-- 商品列表 -->
-<div id="product-list"></div>
+<div class="admin-container">
+    <h2>管理後台 - 商品管理</h2>
 
-<hr>
+    <!-- 商品列表 -->
+    <div id="product-list"></div>
 
-<h3>新增商品</h3>
-<form id="add-form" enctype="multipart/form-data">
-    <input type="text" name="name" placeholder="商品名稱" required>
-    <input type="number" name="price" placeholder="價格" min="0" step="0.01" required>
-    <input type="number" name="stock" placeholder="庫存" min="0" step="1" required>
-    <textarea name="description" placeholder="餐點說明" rows="3"></textarea>
-    <input type="file" name="image" accept="image/*">
-    <br>
-    <label>分類:</label>
-    <select name="category" id="categorySelect"></select>
-    <br><br>
-    <button type="submit">新增商品</button>
-</form>
+    <hr>
 
-<hr>
+    <h3>新增商品</h3>
+    <form id="add-form" enctype="multipart/form-data">
+        <input type="text" name="name" placeholder="商品名稱" required>
+        <input type="number" name="price" placeholder="價格" min="0" step="0.01" required>
+        <input type="number" name="stock" placeholder="庫存" min="0" step="1" required>
+        <textarea name="description" placeholder="餐點說明" rows="4"></textarea>
+        
+        <label for="add-category">選擇分類：</label>
+        <select name="category" id="categorySelect"></select>
+        
+        <label for="add-image">商品圖片：</label>
+        <input type="file" name="image" id="add-image" accept="image/*">
+        
+        <button type="submit">新增商品</button>
+    </form>
 
-<h3>管理分類</h3>
-<input type="text" id="newCategory" placeholder="分類名稱">
-<button type="button" id="addCategoryBtn">新增分類</button>
+    <hr>
+
+    <h3>管理分類</h3>
+    <div class="category-management">
+        <input type="text" id="newCategory" placeholder="輸入新分類名稱">
+        <button type="button" id="addCategoryBtn">新增分類</button>
+    </div>
+</div>
 
 <script defer src="{{ url_for('static', filename='js/admin.js') }}"></script>
 {% endblock %}

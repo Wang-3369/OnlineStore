@@ -7,6 +7,11 @@
         {% for order in orders %}
             <div class="order-block status-{{ order.status }}" data-created-at="{{ order.created_at.isoformat() }}">
                 <h3>訂單編號：{{ order.order_id }}</h3>
+                <div class="progress-track">
+                    <div class="step {% if order.status in ['pending', 'accepted', 'completed'] %}completed{% endif %}">已下單</div>
+                    <div class="step {% if order.status == 'accepted' %}active{% elif order.status == 'completed' %}completed{% endif %}">製作中</div>
+                    <div class="step {% if order.status == 'completed' %}completed{% endif %}">可取餐</div>
+                </div>
                 <p>狀態：
                     {% if order.status == 'pending' %}
                         <span style="color:orange;">⏳ 等待老闆確認中</span>
