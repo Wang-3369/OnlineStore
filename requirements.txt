@@ -7,3 +7,4 @@ Authlib==1.6.6
 requests==2.32.3
 gunicorn==23.0.0
 gevent==25.9.1
+Pillow
