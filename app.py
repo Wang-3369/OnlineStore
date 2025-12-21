@@ -14,7 +14,6 @@ from api.promotions_api import promotion_bp
 from api.stats_api import stats_api
 from api.review_api import review_api
 from api.favorites_api import favorites_bp
-from utils.sse import announcer
 # 導入資料庫 Collection
 from database.db import products_collection, orders_collection, product_reviews_collection
 from dotenv import load_dotenv
