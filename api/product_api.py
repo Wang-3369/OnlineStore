@@ -1,8 +1,10 @@
-from flask import Blueprint, jsonify, request, send_file, session
+from flask import Blueprint, jsonify, request, send_file, session,make_response
 from database.db import db  # db 是 MongoClient().your_db
 from bson.objectid import ObjectId
 from gridfs import GridFS
 import io
+import os
+from utils.image import compress_image
 
 product_bp = Blueprint("product", __name__)
 fs = GridFS(db)
@@ -34,7 +36,20 @@ def get_products():
         "category": p.get("category", "其他")
     } for p in products])
 
-
+# --- get_product_image 內部修正 (解決轉圈圈關鍵) ---
+@product_bp.route("/api/products/image/<image_id>")
+def get_product_image(image_id):
+    try:
+        file = fs.get(ObjectId(image_id))
+        response = make_response(file.read())
+        response.headers['Content-Type'] = 'image/jpeg'
+        cache_timeout = os.getenv("IMAGE_CACHE_TIMEOUT", "86400")
+        response.headers['Cache-Control'] = f'public, max-age={cache_timeout}'
+        return response
+    except Exception as e:
+        print(f"圖片讀取錯誤: {e}")
+        return jsonify({"error": "圖片不存在"}), 404
+    
 @product_bp.route("/api/products", methods=["POST"])
 @role_required(["admin", "sub-admin"])
 def add_product():
@@ -46,7 +61,9 @@ def add_product():
     image_file = request.files.get("image")
 
     if image_file:
-        image_id = fs.put(image_file, filename=image_file.filename)
+        # 關鍵：壓縮圖片，商品圖建議 max_size=(800, 800)
+        compressed_io = compress_image(image_file, max_size=(800, 800), quality=75)
+        image_id = fs.put(compressed_io, filename="product.jpg", content_type="image/jpeg")
     else:
         image_id = None
 
@@ -84,7 +101,9 @@ def update_product(product_id):
     }
 
     if image_file:
-        image_id = fs.put(image_file, filename=image_file.filename)
+        # 這裡也要加上壓縮！
+        compressed_io = compress_image(image_file, max_size=(800, 800), quality=75)
+        image_id = fs.put(compressed_io, filename="product_update.jpg", content_type="image/jpeg")
         update_data["image_id"] = image_id
 
     db.products.update_one({"_id": ObjectId(product_id)}, {"$set": update_data})
@@ -96,15 +115,6 @@ def update_product(product_id):
 def delete_product(product_id):
     db.products.delete_one({"_id": ObjectId(product_id)})
     return jsonify({"message": "商品刪除成功"})
-
-
-@product_bp.route("/api/products/image/<image_id>")
-def get_product_image(image_id):
-    try:
-        file = fs.get(ObjectId(image_id))
-        return send_file(io.BytesIO(file.read()), mimetype="image/jpeg", download_name=file.filename)
-    except:
-        return jsonify({"error": "圖片不存在"}), 404
 
 
 # -------------------- 分類 --------------------
