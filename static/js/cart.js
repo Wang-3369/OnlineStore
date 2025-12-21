@@ -27,6 +27,24 @@ function renderCart(cart) {
     if(modalTotal) modalTotal.innerText = totalText;
 }
 
+function formatTWDate(dateStr) {
+    const date = new Date(dateStr);
+    
+    // 檢查 date 是否有效
+    if (isNaN(date.getTime())) return dateStr;
+
+    // 強制指定 Asia/Taipei 時區顯示，並使用 24 小時制
+    return date.toLocaleString('zh-TW', {
+        timeZone: 'Asia/Taipei',
+        hour12: false,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
 async function fetchCart() {
     const res = await fetch("/api/cart");
     const data = await res.json();

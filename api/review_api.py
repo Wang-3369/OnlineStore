@@ -1,13 +1,18 @@
 from flask import Blueprint, jsonify, request, session
 from database.db import db
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from bson.objectid import ObjectId
 from bson.errors import InvalidId
 
+tw_tz = timezone(timedelta(hours=8))
 review_api = Blueprint("review_api", __name__)
 
 reviews_collection = db.product_reviews
 products_collection = db.products
+
+def get_tw_time():
+    # 強制獲取 UTC 時間並加上 8 小時，回傳一個不帶時區標籤但數值正確的本地時間
+    return datetime.utcnow() + timedelta(hours=8)
 
 # ----------------- 新增評論 (使用者) -----------------
 @review_api.route("/api/reviews", methods=["POST"])
@@ -35,12 +40,12 @@ def add_review():
 
     review = {
         "order_id": order_id,
-        "product_id": product_id,
+        "product_id": data.get("product_id"),
         "username": username,
-        "content": content,
+        "content": content if content else None, # 如果是空字串就存 None 或維持 content
         "rating": int(rating),
-        "created_at": datetime.utcnow(),
-        "reply": None  # 管理者回覆欄位
+        "created_at": get_tw_time(), # 使用強制校正的時間
+        "reply": None
     }
 
     reviews_collection.insert_one(review)
