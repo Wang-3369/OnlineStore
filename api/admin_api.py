@@ -3,14 +3,13 @@ from database.db import users_collection, orders_collection, products_collection
 from bson.objectid import ObjectId
 import json
 from flask_mail import Message
-from utils.sse import announcer, format_sse
 
 admin_bp = Blueprint("admin", __name__)
 
 # --- 權限檢查 Decorator ---
 def admin_required(f):
     def wrapper(*args, **kwargs):
-        if session.get("role") != "admin":
+        if session.get("role") not in ["admin", "sub-admin"]:
             return jsonify({"message": "無權限"}), 403
         return f(*args, **kwargs)
     wrapper.__name__ = f.__name__
@@ -40,7 +39,6 @@ def send_status_email(mail, order, subject_title, status_text):
         print(f"郵件發送錯誤: {e}")
 
 # --- 使用者管理 ---
-
 @admin_bp.route("/api/admin/users", methods=["GET"])
 @admin_required
 def get_users():
@@ -78,7 +76,6 @@ def delete_user():
     return jsonify({"message": "使用者已被刪除"})
 
 # --- 訂單管理 ---
-
 @admin_bp.route("/api/admin/orders", methods=["GET"])
 @admin_required
 def get_all_orders():
@@ -94,7 +91,8 @@ def get_all_orders():
 @admin_bp.route("/api/admin/order/status", methods=["POST"])
 @admin_required
 def update_order_status():
-    from app import mail  
+    # 從 app.py 導入共用實例
+    from app import mail, pusher_client  
     
     data = request.json
     order_id = data.get("order_id")
@@ -106,6 +104,16 @@ def update_order_status():
     order = orders_collection.find_one({"order_id": order_id})
     if not order:
         return jsonify({"message": "找不到訂單"}), 404
+
+    # 狀態對應中文 (用於通知顯示)
+    status_map = {
+        "pending": "待處理",
+        "accepted": "製作中",
+        "completed": "請取餐",
+        "rejected": "已拒絕",
+        "cancelled": "已取消"
+    }
+    chinese_status = status_map.get(new_status, new_status)
 
     # 1. 拒絕訂單回補庫存
     if new_status == "rejected" and order.get("status") != "rejected":
@@ -121,22 +129,26 @@ def update_order_status():
         {"$set": {"status": new_status}}
     )
 
-    # 3. 如果成功更新，觸發通知
+    # 3. 如果成功更新，觸發 Pusher 即時通知與 Email
     if result.modified_count > 0:
-        # Email 通知
+        target_username = order.get("username")
+        
+        # --- A. Pusher 即時通知 (使用者會聽到聲音、看到紅點) ---
+        try:
+            pusher_client.trigger(f'user-{target_username}', 'order-update', {
+                "order_id": order_id,
+                "status": chinese_status
+            })
+            print(f"Pusher 已發送狀態更新至: user-{target_username}")
+        except Exception as pe:
+            print(f"Pusher 發送失敗: {pe}")
+
+        # --- B. Email 通知 ---
         if new_status == "accepted":
             send_status_email(mail, order, "訂單已接受", "您的訂單正在製作中！")
         elif new_status == "completed":
             send_status_email(mail, order, "餐點已完成", "請儘速前往取餐。")
 
-        # SSE 即時網頁通知
-        msg_payload = json.dumps({
-            "order_id": order_id,
-            "status": new_status,
-            "username": order.get("username")
-        })
-        announcer.announce(format_sse(data=msg_payload, event="order_update"))
-
-        return jsonify({"message": f"訂單狀態已更新為 {new_status}"})
+        return jsonify({"message": f"訂單狀態已更新為 {chinese_status}"})
     
     return jsonify({"message": "狀態未變動"}), 400

@@ -786,3 +786,97 @@ main > * {
     padding: 5px 0;
     font-weight: 500;
 }
+/* --- 彈窗通知系統 (支援雙重身份) --- */
+
+/* 基礎容器 */
+.custom-notification {
+    position: fixed;
+    top: 25px;
+    right: 25px;
+    background: #ffffff;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+    padding: 18px 22px;
+    border-radius: 12px;
+    z-index: 10000;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    min-width: 300px;
+    max-width: 400px;
+    animation: slideInRight 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+/* 管理員專用 - 橘色風格 (新訂單) */
+.custom-notification.admin-update {
+    border-left: 6px solid #ff9800;
+    background: linear-gradient(to right, #fff9f0, #ffffff);
+}
+.custom-notification.admin-update .notification-title {
+    color: #e67e22;
+}
+
+/* 使用者專用 - 綠色風格 (狀態更新) */
+.custom-notification.user-update {
+    border-left: 6px solid #4caf50;
+    background: linear-gradient(to right, #f4fff5, #ffffff);
+}
+.custom-notification.user-update .notification-title {
+    color: #2e7d32;
+}
+
+/* 內文樣式 */
+.notification-title {
+    font-weight: 800;
+    font-size: 1.1em;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.notification-body {
+    font-size: 0.95em;
+    color: #4a5568;
+    line-height: 1.5;
+}
+
+.notification-hint {
+    font-size: 0.8em;
+    color: #a0aec0;
+    margin-top: 10px;
+    text-align: right;
+    font-style: italic;
+    border-top: 1px solid rgba(0,0,0,0.05);
+    padding-top: 5px;
+}
+
+/* 懸浮效果 */
+.custom-notification:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+}
+
+/* 進入動畫 */
+@keyframes slideInRight {
+    from { 
+        transform: translateX(120%); 
+        opacity: 0; 
+    }
+    to { 
+        transform: translateX(0); 
+        opacity: 1; 
+    }
+}
+
+/* 紅點脈衝動畫 (套用到原本的紅點) */
+@keyframes pulse-red {
+    0% { box-shadow: 0 0 0 0 rgba(255, 77, 77, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(255, 77, 77, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 77, 77, 0); }
+}
+
+.notification-dot::after {
+    animation: pulse-red 1.5s infinite !important;
+}
