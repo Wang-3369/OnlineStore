@@ -17,7 +17,7 @@ def add_review():
         return jsonify({"message": "請先登入"}), 401
 
     data = request.json
-    content = data.get("")
+    content = data.get("content")
     rating = data.get("rating")
     order_id = data.get("order_id")  # 訂單 ID
     product_id = data.get("product_id")  # 可選
