@@ -2,6 +2,13 @@ let currentOrderId = null;
 let selectedRating = 0;
 
 document.addEventListener("DOMContentLoaded", async () => {
+    // 🔧 修復：將 modal 移到 body 底部
+    const modal = document.getElementById("review-modal");
+    if (modal && modal.parentElement.tagName !== 'BODY') {
+        document.body.appendChild(modal);
+        console.log('✅ Modal 已移到 body');
+    }
+
     const orders = document.querySelectorAll(".order-block");
 
     // 1. 取得所有評論並渲染已評論狀態
@@ -46,11 +53,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     });
 
-    // 3. 評論彈窗控制
+    // 3. 評論彈窗控制（修復版）
     document.querySelectorAll(".review-btn").forEach(btn => {
         btn.addEventListener("click", () => {
             currentOrderId = btn.dataset.orderId;
-            document.getElementById("review-modal").style.display = "block";
+            modal.style.display = "flex"; // 改用 flex 讓內容居中
+            document.body.classList.add("modal-open"); // 鎖定背景滾動
         });
     });
 
@@ -96,7 +104,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         // 重置 Modal
         selectedRating = 0;
         document.getElementById("review-text").value = "";
-        document.getElementById("review-modal").style.display = "none";
+        modal.style.display = "none";
+        document.body.classList.remove("modal-open"); // 解除滾動鎖定
         document.querySelectorAll("#star-rating span").forEach(s => s.classList.remove("selected"));
 
         // 更新按鈕狀態
@@ -108,9 +117,18 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     });
 
-    // 6. 關閉彈窗
+    // 6. 關閉彈窗（修復版）
     document.getElementById("close-review").addEventListener("click", () => {
-        document.getElementById("review-modal").style.display = "none";
+        modal.style.display = "none";
+        document.body.classList.remove("modal-open"); // 解除滾動鎖定
+    });
+
+    // 🔧 新增：點擊遮罩層關閉
+    modal.addEventListener("click", (e) => {
+        if (e.target.id === "review-modal") {
+            modal.style.display = "none";
+            document.body.classList.remove("modal-open");
+        }
     });
 });
 

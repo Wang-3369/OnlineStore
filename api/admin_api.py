@@ -4,6 +4,7 @@ from bson.objectid import ObjectId
 import json
 from flask_mail import Message
 
+
 admin_bp = Blueprint("admin", __name__)
 
 # --- 權限檢查 Decorator ---

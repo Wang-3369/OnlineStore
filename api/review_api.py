@@ -17,13 +17,10 @@ def add_review():
         return jsonify({"message": "請先登入"}), 401
 
     data = request.json
-    content = data.get("content")
+    content = data.get("")
     rating = data.get("rating")
     order_id = data.get("order_id")  # 訂單 ID
     product_id = data.get("product_id")  # 可選
-
-    if not content:
-        return jsonify({"message": "評論內容不能為空"}), 400
 
     if not rating or not (1 <= int(rating) <= 5):
         return jsonify({"message": "請提供 1~5 星評分"}), 400
