@@ -1,81 +1,83 @@
+/* 基礎容器優化 */
 .product-detail-container {
     display: flex;
-    gap: 3em;
-    padding: 3em;
-    max-width: 1200px;
-    margin: 2em auto;
-    background: rgba(255, 255, 255, 0.98);
-    border-radius: 20px;
-    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
+    gap: 40px;
+    padding: 40px;
+    max-width: 1100px;
+    margin: 40px auto;
+    background: #ffffff;
+    border-radius: 24px;
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.08);
+    align-items: center;
 }
 
+/* 圖片區塊 */
 .image-section {
     flex: 1;
     display: flex;
     justify-content: center;
-    align-items: flex-start;
-    position: relative;
+    align-items: center;
 }
 
 .product-image {
-    width: 400px !important;
-    height: 400px !important;
-    object-fit: cover !important;
+    width: 100%;
+    max-width: 450px;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
     border-radius: 20px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-    display: block;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
     transition: transform 0.4s ease;
-    border: 3px solid #667eea;
+    border: 4px solid #f8f9fa;
 }
 
 .product-image:hover {
-    transform: scale(1.05);
+    transform: scale(1.03);
 }
 
+/* 資訊區塊佈局 */
 .product-info {
-    flex: 1;
+    flex: 1.2;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 15px;
 }
 
 .product-info h2 {
-    margin-bottom: 10px;
-    font-size: 2.2em;
-    color: #2d3748;
-    font-weight: 700;
+    font-size: 2.2rem;
+    font-weight: 800;
+    margin-bottom: 5px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    background-clip: text;
 }
 
 .product-info p {
-    font-size: 1.1em;
-    margin: 12px 0;
+    font-size: 1.1rem;
     color: #4a5568;
-    line-height: 1.8;
-    padding: 10px 0;
-    border-bottom: 1px solid #e2e8f0;
+    line-height: 1.6;
+    margin: 5px 0;
 }
 
-.product-info p:last-of-type {
-    border-bottom: none;
+/* 價格樣式 */
+.product-info .price {
+    font-size: 1.8rem;
+    color: #e74c3c;
+    font-weight: 800;
+    margin: 10px 0;
 }
 
 .product-info strong {
     color: #2d3748;
-    font-weight: 600;
 }
 
+/* 數量選擇與標籤 */
 .product-info label {
-    font-size: 1.1em;
     font-weight: 600;
     color: #4a5568;
     display: flex;
     align-items: center;
-    gap: 15px;
-    margin-top: 20px;
+    gap: 12px;
+    margin-top: 15px;
 }
 
 .product-info input[type="number"] {
@@ -83,7 +85,7 @@
     padding: 10px;
     border: 2px solid #e2e8f0;
     border-radius: 10px;
-    font-size: 1em;
+    font-size: 1rem;
     text-align: center;
     transition: all 0.3s ease;
 }
@@ -94,96 +96,69 @@
     box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
 }
 
-.product-info button {
-    margin-top: 25px;
+/* 按鈕樣式 */
+#add-cart-btn {
+    margin-top: 20px;
     padding: 16px 40px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     border: none;
-    border-radius: 12px;
+    border-radius: 15px;
     cursor: pointer;
-    font-size: 1.2em;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    box-shadow: 0 6px 25px rgba(102, 126, 234, 0.4);
+    font-size: 1.1rem;
+    font-weight: 700;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+    width: fit-content;
 }
 
-.product-info button:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 35px rgba(102, 126, 234, 0.5);
+#add-cart-btn:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
 }
 
-.product-info button:active {
+#add-cart-btn:active {
     transform: translateY(0) scale(0.98);
 }
 
+/* 回列表連結 */
 .product-info a {
     display: inline-block;
-    margin-top: 25px;
-    color: #667eea;
+    margin-top: 20px;
+    color: #718096;
     text-decoration: none;
-    font-weight: 600;
-    font-size: 1em;
-    transition: all 0.3s ease;
-    position: relative;
-}
-
-.product-info a::after {
-    content: '←';
-    margin-left: 8px;
-    transition: margin-left 0.3s ease;
+    font-size: 0.95rem;
+    transition: color 0.3s;
 }
 
 .product-info a:hover {
-    color: #764ba2;
+    color: #667eea;
 }
 
-.product-info a:hover::after {
-    margin-left: 3px;
-}
-
-/* 響應式設計 */
-@media screen and (max-width: 768px) {
+/* 響應式：手機版排列 */
+@media (max-width: 850px) {
     .product-detail-container {
         flex-direction: column;
-        align-items: center;
-        padding: 2em;
+        padding: 30px;
+        margin: 20px;
+        text-align: center;
     }
-    
-    .product-image {
-        width: 100% !important;
-        max-width: 350px !important;
-        height: auto !important;
-    }
-    
-    .product-info {
+
+    .image-section {
         width: 100%;
     }
-    
-    .product-info h2 {
-        font-size: 1.8em;
-    }
-}
 
-@media screen and (max-width: 500px) {
-    .product-detail-container {
-        padding: 1.5em;
-    }
-    
     .product-image {
-        max-width: 280px !important;
+        max-width: 350px;
     }
-    
-    .product-info h2 {
-        font-size: 1.5em;
+
+    .product-info {
+        align-items: center;
+        width: 100%;
     }
-    
-    .product-info p {
-        font-size: 1em;
-    }
-    
-    .product-info button {
-        padding: 14px 30px;
-        font-size: 1.1em;
+
+    #add-cart-btn {
+        width: 100%;
+        max-width: 300px;
     }
 }

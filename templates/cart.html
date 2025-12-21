@@ -2,35 +2,75 @@
 {% block content %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/cart.css') }}">
 
-<div class="cart-container">
-    <h2>購物車</h2>
+<h2>購物車</h2>
 
-    <table border="1" cellpadding="5">
-        <thead>
-            <tr>
-                <th>商品名稱</th>
-                <th>單價</th>
-                <th>數量</th>
-                <th>小計</th>
-                <th>操作</th>
-            </tr>
-        </thead>
-        <tbody id="cart-body"></tbody>
-    </table>
+<table class="cart-table">
+    <thead>
+        <tr>
+            <th>商品名稱</th>
+            <th>單價</th>
+            <th>數量</th>
+            <th>小計</th>
+            <th>操作</th>
+        </tr>
+    </thead>
+    <tbody id="cart-body"></tbody>
+</table>
 
-    <p id="total-price" style="font-size: 1.2em; font-weight: bold; margin: 20px 0; text-align: right;">總計：NT$ 0</p>
-
-    <div style="margin: 20px 0;">
-        <label for="pickup-time">預定取餐時間：</label>
-        <input type="time" id="pickup-time" required>
-    </div>
-
-    <div style="margin: 20px 0;">
-        <label for="order-note">備註：</label><br>
-        <textarea id="order-note" rows="3" style="width: 100%;" placeholder="例如：少冰、不辣、不要香菜"></textarea>
-    </div>
-
-    <button id="checkout-btn">結帳</button>
+<div class="cart-footer">
+    <p id="total-price"></p>
+    <button id="open-checkout-modal" class="btn-primary">前往結帳</button>
 </div>
+
+<div id="checkout-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <h3>確認訂單資訊</h3>
+        <hr>
+        
+        <div class="input-group">
+            <label for="user-gmail">聯絡 Gmail：</label>
+            <input type="email" id="user-gmail" placeholder="example@gmail.com" required>
+        </div>
+
+        <div class="input-group">
+            <label>用餐方式：</label>
+            <div class="radio-group">
+                <input type="radio" id="dine-in" name="dining-option" value="內用" checked>
+                <label for="dine-in">內用</label>
+                <input type="radio" id="take-out" name="dining-option" value="外帶">
+                <label for="take-out">外帶</label>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label for="pickup-time">預定取餐/到店時間：</label>
+            <input type="time" id="pickup-time" required>
+        </div>
+
+        <div class="input-group">
+            <label for="order-note">備註：</label>
+            <textarea id="order-note" rows="2" placeholder="例如：去冰、不辣"></textarea>
+        </div>
+
+        <div class="payment-info">
+            <p><strong>支付方式：</strong> 現金支付 (其他支付方式尚未解鎖 🔒)</p>
+        </div>
+
+        <div class="promo-preview" id="promo-preview-section" style="display:none;">
+            <div class="promo-tag">已套用優惠：<span id="promo-title"></span></div>
+            <p id="discount-detail" style="color: #e74c3c; font-size: 0.9em; margin: 5px 0;"></p>
+        </div>
+
+        <div class="modal-actions">
+            <div class="price-summary">
+                <p id="modal-subtotal-display" style="text-decoration: line-through; color: #999; font-size: 0.9em; display:none;"></p>
+                <p id="modal-total-display" style="font-weight: bold; font-size: 1.2rem;">總計：NT$ 0</p>
+            </div>
+            <button id="confirm-checkout-btn" class="btn-success">確認送出訂單</button>
+        </div>
+    </div>
+</div>
+
 <script src="{{ url_for('static', filename='js/cart.js') }}"></script>
 {% endblock %}

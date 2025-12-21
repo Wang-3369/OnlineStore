@@ -1,10 +1,27 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>註冊</h2>
-<form id="register-form">
-    <label>帳號：<input type="text" name="username" required></label><br>
-    <label>密碼：<input type="password" name="password" required></label><br>
-    <button type="submit">註冊</button>
-</form>
-<script defer src="{{ url_for('static', filename='js/register.js') }}"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+
+<div class="login-container">
+    <h2>立即註冊</h2>
+    <p>加入北寧路早餐店，享受美味晨光</p>
+
+    <form id="register-form">
+        <div class="form-group">
+            <label>帳號</label>
+            <input type="text" name="username" placeholder="請設定您的帳號" required>
+        </div>
+        <div class="form-group">
+            <label>密碼</label>
+            <input type="password" name="password" placeholder="請設定您的密碼" required>
+        </div>
+        <button type="submit">註冊帳號</button>
+    </form>
+
+    <div class="auth-footer">
+        已經有帳號了？ <a href="/login">立即登入</a>
+    </div>
+</div>
+
+<script defer src="{{ url_for('static', filename='js/auth.js') }}"></script>
 {% endblock %}

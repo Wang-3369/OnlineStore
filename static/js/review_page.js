@@ -75,24 +75,49 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // 星級統計圖
     function renderRatingChart() {
-        const counts = [0,0,0,0,0];
-        reviewsData.forEach(r => counts[r.rating - 1]++);
-        const ctx = document.getElementById("rating-chart").getContext("2d");
+    // 取得 1-5 星的數量
+    const counts = [0, 0, 0, 0, 0];
+    reviewsData.forEach(r => {
+        if (r.rating >= 1 && r.rating <= 5) counts[r.rating - 1]++;
+    });
 
-        if (window.ratingChart) window.ratingChart.destroy();
-        window.ratingChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: ['★1','★2','★3','★4','★5'],
-                datasets: [{
-                    label: '評論數量',
-                    data: counts,
-                    backgroundColor: '#f39c12'
-                }]
+    const ctx = document.getElementById("rating-chart").getContext("2d");
+
+    if (window.ratingChart) window.ratingChart.destroy();
+    
+    window.ratingChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            // 反轉標籤，讓 5 星排在最前面
+            labels: ['5★', '4★', '3★', '2★', '1★'],
+            datasets: [{
+                label: '評論數量',
+                data: [...counts].reverse(), // 數據也要跟著反轉
+                backgroundColor: '#f1c40f', // 使用更有質感的金黃色
+                borderRadius: 4,
+                barThickness: 20 // 讓柱狀圖不要太粗，比較精緻
+            }]
+        },
+        options: {
+            indexAxis: 'y', // 改為橫向排列，更適合手機端閱讀
+            responsive: true,
+            maintainAspectRatio: false, // 允許自定義高度
+            plugins: {
+                legend: { display: false } // 隱藏上方圖例，節省空間
             },
-            options: { responsive: true, scales: { y: { beginAtZero: true } } }
-        });
-    }
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    ticks: { stepSize: 1 }, // 數量顯示為整數
+                    grid: { display: false } // 隱藏背景格線
+                },
+                y: {
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+}
 
     sortSelect.addEventListener("change", renderReviews);
 

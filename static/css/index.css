@@ -1,122 +1,130 @@
-/* ===== 促銷輪播區容器 ===== */
+/* 全域設定 */
+body {
+    background-color: #f8f9fa;
+    font-family: "Noto Sans TC", sans-serif;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+/* ===== 促銷輪播區 ===== */
 .promo-slider-container {
-    width: 100%;
+    width: 95%;
     max-width: 1200px;
     height: 400px;
     margin: 20px auto;
     position: relative;
     overflow: hidden;
     border-radius: 20px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
     background: #fff;
 }
 
-/* ===== 輪播軌道 (Flexbox 橫向排列) ===== */
 .promo-slider {
-    display: flex;      /* 讓圖片橫向排成一列 */
+    display: flex;
     width: 100%;
     height: 100%;
-    transition: transform 0.5s ease-in-out; /* 加上滑動動畫 */
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ===== 圖片本體 ===== */
 .promo-slider img {
     width: 100%;
-    height: 100%;
-    object-fit: contain;
+    flex-basis: 100%;
     flex-shrink: 0;
+    height: 100%;
+    object-fit: cover; /* 滿版展示 */
     display: block;
 }
 
-/* ===== 左右切換按鈕 ===== */
+/* 輪播按鈕 */
 .promo-slider-container button.prev,
 .promo-slider-container button.next {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.3);
     border: 1px solid rgba(255, 255, 255, 0.5);
-    color: white;
-    padding: 10px 15px;
+    color: #333;
+    width: 45px;
+    height: 45px;
     cursor: pointer;
-    font-size: 1.5em;
     border-radius: 50%;
     z-index: 10;
-    transition: all 0.3s ease;
-    backdrop-filter: blur(5px);
+    backdrop-filter: blur(8px);
+    transition: all 0.3s;
+    opacity: 0; /* 預設隱藏 */
+}
+
+.promo-slider-container:hover button.prev,
+.promo-slider-container:hover button.next {
+    opacity: 1;
 }
 
 .promo-slider-container button.prev { left: 20px; }
 .promo-slider-container button.next { right: 20px; }
 
-.promo-slider-container button:hover {
-    background: rgba(255, 255, 255, 0.8);
-    color: #667eea;
-}
-
-/* ===== 底部圓點指示 ===== */
+/* 底部指示圓點 */
 .dots {
     position: absolute;
     bottom: 20px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
-    gap: 12px;
+    gap: 10px;
     z-index: 10;
 }
 
 .dots span {
-    width: 12px;
-    height: 12px;
-    background: rgba(255, 255, 255, 0.4);
+    width: 10px;
+    height: 10px;
+    background: rgba(255, 255, 255, 0.5);
     border-radius: 50%;
     cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transition: 0.3s;
 }
 
 .dots span.active {
     background: #fff;
-    transform: scale(1.2);
+    width: 25px; /* 拉長效果 */
+    border-radius: 10px;
 }
 
+/* ===== 主容器佈局 ===== */
 .main-container {
     display: flex;
     max-width: 1400px;
-    margin: 0 auto;
-    padding: 20px;
+    margin: 40px auto;
+    padding: 0 20px;
     gap: 30px;
     align-items: flex-start;
 }
 
 /* 左側分類欄 */
 .category-sidebar {
-    width: 250px;
+    width: 200px;
     flex-shrink: 0;
     position: sticky;
     top: 100px;
-    background: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(10px);
     border-radius: 16px;
     padding: 15px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-    max-height: calc(100vh - 120px);
-    overflow-y: auto;
 }
 
 #category-list button {
     display: block;
     width: 100%;
     text-align: left;
-    padding: 12px 20px;
-    margin-bottom: 8px;
+    padding: 12px 18px;
+    margin-bottom: 5px;
     border: none;
     background: transparent;
     border-radius: 10px;
     color: #4a5568;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: 0.2s;
 }
 
 #category-list button:hover {
@@ -130,38 +138,95 @@
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
-/* 右側商品列表容器 */
+/* 右側商品列表 */
 .product-list-container {
     flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 40px;
 }
 
 .product-category h3 {
-    margin-bottom: 20px;
-    padding-left: 15px;
-    border-left: 5px solid #667eea;
-    font-size: 1.5em;
+    font-size: 1.6rem;
     color: #2d3748;
+    margin: 0 0 25px 0;
+    padding-left: 15px;
+    border-left: 6px solid #667eea;
 }
 
 .product-list {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     gap: 25px;
+    margin-bottom: 50px;
 }
 
-/* RWD 響應式調整 */
+/* 商品卡片 */
+.product-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+    transition: all 0.3s ease;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+}
+
+.product-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+}
+
+.product-card img {
+    width: 100%;
+    aspect-ratio: 1/1;
+    object-fit: cover;
+    border-radius: 12px;
+    margin-bottom: 15px;
+}
+
+.product-card h3 {
+    font-size: 1.1rem;
+    margin: 5px 0;
+    height: 2.4em; /* 限制兩行 */
+    overflow: hidden;
+}
+
+.product-card p.price {
+    color: #e74c3c;
+    font-weight: 800;
+    font-size: 1.3rem;
+    margin: 10px 0;
+}
+
+.add-cart-btn {
+    width: 100%;
+    padding: 12px;
+    background: #2d3436;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.add-cart-btn:hover {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+/* ===== 響應式調整 ===== */
 @media (max-width: 900px) {
+    .promo-slider-container { height: 250px; }
+    
     .main-container {
         flex-direction: column;
     }
-    
+
     .category-sidebar {
         width: 100%;
-        position: static;
-        margin-bottom: 20px;
+        position: sticky;
+        top: 0;
+        z-index: 100;
         display: flex;
         overflow-x: auto;
         padding: 10px;
@@ -170,42 +235,13 @@
 
     #category-list {
         display: flex;
-        gap: 10px;
         width: max-content;
+        gap: 10px;
     }
 
     #category-list button {
         width: auto;
         white-space: nowrap;
-        margin: 0;
+        margin-bottom: 0;
     }
-
-    .promo-slider-container {
-        height: 250px;
-    }
-}
-
-.product-card {
-    position: relative;
-    overflow: hidden;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.product-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.15);
-}
-
-.product-card::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
-    opacity: 0;
-    transition: opacity 0.3s;
-    pointer-events: none;
-}
-
-.product-card:hover::after {
-    opacity: 1;
 }

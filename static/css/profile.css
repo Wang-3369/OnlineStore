@@ -1,0 +1,83 @@
+/* profile.css */
+
+h2, h3 {
+    color: #1a1a1a;
+}
+
+h3 {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid #ddd;
+}
+
+/* 個人資料區塊容器 (可選：在 HTML 加入容器標籤) */
+.profile-section {
+    background: #fff;
+    padding: 2em;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    max-width: 500px;
+    margin: 20px auto;
+}
+
+/* 頭像樣式 */
+#avatar-img {
+    border: 3px solid #fff;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    display: block;
+    margin-bottom: 15px;
+}
+
+/* 輸入框統一樣式 */
+input[type="file"],
+input[type="password"],
+input[type="email"] {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    box-sizing: border-box;
+}
+#change-email {
+    background-color: #28a745; /* 綠色，區分修改密碼的藍色 */
+    color: white;
+}
+#change-email:hover {
+    background-color: #218838;
+}
+/* 按鈕美化 */
+button {
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    margin-right: 5px;
+}
+
+/* 上傳與修改按鈕 (藍色系) */
+#upload-avatar, #change-password {
+    background-color: #007bff;
+    color: white;
+}
+
+#upload-avatar:hover, #change-password:hover {
+    background-color: #0056b3;
+}
+
+/* 刪除按鈕 (紅色系) */
+#delete-avatar {
+    background-color: #dc3545;
+    color: white;
+}
+
+#delete-avatar:hover {
+    background-color: #c82333;
+}
+
+button:active {
+    transform: translateY(1px) scale(0.97);
+}

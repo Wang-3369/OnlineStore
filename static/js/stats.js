@@ -43,9 +43,15 @@ function processSalesData(orders) {
 
 // ===== 顯示圖表 =====
 function showChart(type) {
-    document.getElementById("barChart").style.display = type === "bar" ? "block" : "none";
-    document.getElementById("lineChart").style.display = type === "line" ? "block" : "none";
-    document.getElementById("pieChart").style.display = type === "pie" ? "block" : "none";
+    // 切換顯示
+    const charts = ["barChart", "lineChart", "pieChart"];
+    charts.forEach(c => {
+        document.getElementById(c).style.display = (c === type + "Chart") ? "block" : "none";
+    });
+
+    // 根據類型觸發載入
+    if (type === 'line') loadLineChart();
+    if (type === 'pie') loadPieChart();
 }
 
 // ===== 載入商品累計長條圖 =====
@@ -159,31 +165,26 @@ function exportCSV() {
 }
 
 // ===== DOM 載入完成後 =====
+// ===== DOM 載入完成後 =====
 document.addEventListener("DOMContentLoaded", () => {
-    // 長條圖模式按鈕
-    document.getElementById("barByProductBtn").addEventListener("click", () => switchBarMode("product"));
-    document.getElementById("barByDateBtn").addEventListener("click", () => switchBarMode("date"));
+    // 初始化
+    updateAllStats();
 
-    // 預設載入長條圖、折線圖、圓餅圖
-    switchBarMode("product");
-    loadLineChart();
-    loadPieChart();
-
-    // 日期篩選按鈕
-    const filterBtn = document.getElementById("filterDateBtn");
-    filterBtn.addEventListener("click", () => {
-        switchBarMode(barMode);
-        loadLineChart();
-        loadPieChart();
+    // 事件監聽整合
+    document.getElementById("barByProductBtn").addEventListener("click", () => {
+        barMode = "product";
+        showChart('bar');
+        loadBarChartByProduct();
     });
 
-    // checkbox 開關
-    const includePending = document.getElementById("includePending");
-    if (includePending) includePending.addEventListener("change", () => {
-        switchBarMode(barMode);
-        loadLineChart();
-        loadPieChart();
+    document.getElementById("barByDateBtn").addEventListener("click", () => {
+        barMode = "date";
+        showChart('bar');
+        loadBarChartByDate();
     });
+
+    document.getElementById("filterDateBtn").addEventListener("click", updateAllStats);
+    document.getElementById("includePending").addEventListener("change", updateAllStats);
 
     // 清理訂單按鈕
     const clearBtn = document.getElementById("clearOrdersBtn");
@@ -208,23 +209,39 @@ document.addEventListener("DOMContentLoaded", () => {
         
 });
 
-//營業額
+// ===== 載入所有數據的總發動機 =====
+async function updateAllStats() {
+    // 1. 更新圖表
+    if (barMode === "product") await loadBarChartByProduct();
+    else await loadBarChartByDate();
+    
+    // 如果折線圖或圓餅圖是顯示狀態，也更新它們
+    if(document.getElementById("lineChart").style.display !== "none") loadLineChart();
+    if(document.getElementById("pieChart").style.display !== "none") loadPieChart();
+
+    // 2. 更新上方數據卡片
+    refreshRevenue();
+}
+
+// ===== 更新營業額卡片 =====
+// 修改 stats.js 中的 refreshRevenue
 async function refreshRevenue() {
     try {
-        const response = await fetch("/api/orders");
-        if (!response.ok) throw new Error("抓資料失敗：" + response.status);
-
+        const queryParams = getQueryParams();
+        
+        // 呼叫我們新寫的 summary API
+        const response = await fetch("/api/stats/summary" + queryParams);
         const data = await response.json();
-        const orders = data.orders || [];
-
-        let revenue = 0;
-        orders.forEach(order => {
-            revenue += order.total;
-        });
-        document.getElementById("totalRevenue").textContent = revenue;
+        
+        // 更新「總營業額」卡片
+        const revEl = document.getElementById("totalRevenue");
+        if(revEl) revEl.textContent = data.total_revenue.toLocaleString();
+        
+        // 更新「篩選範圍內訂單數」卡片 
+        const countEl = document.getElementById("filteredOrderCount");
+        if(countEl) countEl.textContent = data.order_count.toLocaleString();
 
     } catch (err) {
-        console.error(err);
-        document.getElementById("totalRevenue").textContent = 0;
+        console.error("更新數據卡片失敗", err);
     }
 }

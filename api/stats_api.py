@@ -203,3 +203,24 @@ def stats_orders_by_date_products():
 
     return jsonify({"labels": all_dates, "datasets": result})
 
+# 在 stats_api.py 中新增
+@stats_api.route("/api/stats/summary")
+def stats_summary():
+    start = parse_date(request.args.get("start"))
+    end = parse_date(request.args.get("end"))
+    include_pending = request.args.get("include_pending", "false").lower() == "true"
+
+    query = build_query(start, end, include_pending)
+    
+    # 直接計算符合 query 條件的訂單數量
+    order_count = orders_collection.count_documents(query)
+    
+    # 同時計算總額 (避免前端重複計算)
+    orders = orders_collection.find(query)
+    total_revenue = sum(order.get("total", 0) for order in orders)
+
+    return jsonify({
+        "order_count": order_count,
+        "total_revenue": total_revenue
+    })
+

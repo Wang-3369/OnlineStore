@@ -1,5 +1,5 @@
 from flask import Blueprint, session, request, jsonify
-from database.db import products_collection
+from database.db import products_collection, orders_collection, promotions_collection
 from bson.objectid import ObjectId
 from datetime import datetime, timedelta, timezone
 import uuid
@@ -8,11 +8,13 @@ import json
 
 cart_bp = Blueprint("cart", __name__)
 
+# 設定台灣時區
 tw_tz = timezone(timedelta(hours=8))
 
-# 加入購物車
+# --- 加入購物車 ---
 @cart_bp.route("/api/cart/add", methods=["POST"])
-def add_to_cart():    
+def add_to_cart():
+    # 點餐時間檢查 (06:00 - 24:00)
     current_hour = datetime.now(tw_tz).hour
     if not (6 <= current_hour < 24):
         return jsonify({"message": "目前非點餐時間 (06:00-24:00)"}), 400
@@ -24,36 +26,24 @@ def add_to_cart():
     if not item_id:
         return jsonify({"message": "缺少 product_id"}), 400
 
-    item = None
-    warning_msg = None
-
     try:
-        # 直接查詢商品資料庫
         item = products_collection.find_one({"_id": ObjectId(item_id)})
+        if not item:
+            return jsonify({"message": "商品不存在"}), 404
+
+        # 庫存檢查
+        cart = session.get("cart", {})
+        current_qty_in_cart = cart.get(item_id, {}).get("quantity", 0)
         
-        if item:
-            # === 庫存檢查邏輯 ===
-            cart = session.get("cart", {})
-            current_qty_in_cart = cart.get(item_id, {}).get("quantity", 0)
+        if item["stock"] < (current_qty_in_cart + quantity):
+            return jsonify({
+                "message": f"庫存不足！目前剩餘 {item['stock']}，您購物車已有 {current_qty_in_cart}"
+            }), 400
             
-            if item["stock"] < (current_qty_in_cart + quantity):
-                return jsonify({
-                    "message": f"庫存不足！目前剩餘 {item['stock']}，您購物車已有 {current_qty_in_cart}"
-                }), 400
-            
-            # === 庫存預警 ===
-            if item["stock"] < 5:
-                warning_msg = f"注意：{item['name']} 即將售完"
-            
-    except Exception as e:
-        return jsonify({"message": "無效的 ID"}), 400
+    except Exception:
+        return jsonify({"message": "無效的商品 ID"}), 400
 
-    if not item:
-        return jsonify({"message": "商品不存在"}), 404
-
-    # 3. 更新購物車 (Session)
-    cart = session.get("cart", {})
-    
+    # 更新 Session 購物車
     if item_id in cart:
         cart[item_id]["quantity"] += quantity
     else:
@@ -65,35 +55,36 @@ def add_to_cart():
         }
     
     session["cart"] = cart
-
-    # 4. 回傳結果
-    response_data = {
-        "message": f"{item['name']} 已加入購物車", 
-        "cart": cart
-    }
     
+    warning_msg = f"注意：{item['name']} 即將售完" if item["stock"] < 5 else None
+    response_data = {"message": f"{item['name']} 已加入購物車", "cart": cart}
     if warning_msg:
         response_data["warning"] = warning_msg
         
     return jsonify(response_data)
 
-# 更新購物車數量
+# --- 取得購物車內容 ---
+@cart_bp.route("/api/cart", methods=["GET"])
+def get_cart():
+    cart = session.get("cart", {})
+    for p_id in list(cart.keys()):
+        product = products_collection.find_one({"_id": ObjectId(p_id)})
+        if product:
+            cart[p_id]["category"] = product.get("category", "")
+    return jsonify({"cart": cart})
+
+# --- 更新數量與刪除 ---
 @cart_bp.route("/api/cart/update", methods=["POST"])
 def update_cart():
     data = request.json
-    product_id = str(data.get("product_id"))
-    quantity = int(data.get("quantity", 1))
+    product_id, quantity = str(data.get("product_id")), int(data.get("quantity", 1))
     cart = session.get("cart", {})
-
     if product_id in cart:
-        if quantity <= 0:
-            cart.pop(product_id)
-        else:
-            cart[product_id]["quantity"] = quantity
+        if quantity <= 0: cart.pop(product_id)
+        else: cart[product_id]["quantity"] = quantity
         session["cart"] = cart
     return jsonify({"cart": cart})
 
-# 刪除購物車商品
 @cart_bp.route("/api/cart/remove", methods=["POST"])
 def remove_cart_item():
     product_id = str(request.json.get("product_id"))
@@ -103,92 +94,112 @@ def remove_cart_item():
         session["cart"] = cart
     return jsonify({"cart": cart})
 
-# 取得購物車內容
-@cart_bp.route("/api/cart", methods=["GET"])
-def get_cart():
-    cart = session.get("cart", {})
-    return jsonify({"cart": cart})
-
-from database.db import orders_collection  # 新增：訂單 collection
-
-# 結帳，產生訂單編號並存入 MongoDB
+# --- 結帳 (核心邏輯) ---
 @cart_bp.route("/api/cart/checkout", methods=["POST"])
 def checkout():
     cart = session.get("cart", {})
     username = session.get("username")
 
-    if not cart:
-        return jsonify({"message": "購物車為空"}), 400
-    if not username:
-        return jsonify({"message": "尚未登入"}), 403
+    if not cart: return jsonify({"message": "購物車為空"}), 400
+    if not username: return jsonify({"message": "尚未登入"}), 403
     
-    pickup_time = request.json.get("pickup_time")
-    if not pickup_time:
-         return jsonify({"message": "請選擇取餐時間"}), 400
+    data = request.json
+    gmail, pickup_time, note = data.get("gmail"), data.get("pickup_time"), data.get("note", "")
 
-    note = request.json.get("note", "")
-
-    # === 1. 執行扣庫存 (含防超賣邏輯) ===
-    deducted_log = [] 
+    full_cart_items = []
+    grand_subtotal = 0
+    deducted_log = []
 
     try:
-        for item_id, item in cart.items():
+        # 1. 庫存預扣與資訊抓取
+        for pid, item in cart.items():
             qty = int(item["quantity"])
-            
-            # 直接扣除該商品庫存 (不再區分套餐或單品)
-            result = products_collection.update_one(
-                {"_id": ObjectId(item_id), "stock": {"$gte": qty}},
+            # 原子操作：檢查庫存並扣除，防止超賣
+            res = products_collection.update_one(
+                {"_id": ObjectId(pid), "stock": {"$gte": qty}},
                 {"$inc": {"stock": -qty}}
             )
+            if res.modified_count == 0:
+                raise Exception(f"商品「{item['name']}」庫存不足")
             
-            if result.modified_count == 0:
-                raise Exception(f"商品「{item['name']}」庫存不足，剛好被搶光了！")
+            deducted_log.append((pid, qty))
             
-            deducted_log.append((item_id, qty))
+            product = products_collection.find_one({"_id": ObjectId(pid)})
+            item_total = float(item["price"]) * qty
+            full_cart_items.append({
+                "product_id": pid,
+                "name": item["name"],
+                "category": str(product.get("category", "")).strip(),
+                "subtotal": item_total,
+                "quantity": qty
+            })
+            grand_subtotal += item_total
 
-    except Exception as e:
-        # === 錯誤處理：回滾 (Rollback) ===
-        for pid, q in deducted_log:
-            products_collection.update_one(
-                {"_id": ObjectId(pid)}, 
-                {"$inc": {"stock": q}}
-            )
-        return jsonify({"message": f"結帳失敗：{str(e)}"}), 400
+        # 2. 促銷計算邏輯
+        all_promos = list(promotions_collection.find())
+        best_final_total = grand_subtotal
+        applied_promo = None
 
-    # === 2. 計算總價 + 產生訂單 ===
-    total = sum(float(item["price"]) * int(item["quantity"]) for item in cart.values())
-    order_id = str(uuid.uuid4())[:8]
+        for promo in all_promos:
+            threshold = float(promo.get("threshold", 0))
+            scope_type = promo.get("scope_type", "all")
+            scope_val = str(promo.get("scope_value", "")).strip()
+            eligible_amount = 0
 
-    order_data = {
-        "order_id": order_id,
-        "username": username,
-        "products": cart,
-        "total": total,
-        "pickup_time": pickup_time,
-        "note": note,
-        "status": "pending",
-        "created_at": datetime.now(timezone.utc)
-    }
-    orders_collection.insert_one(order_data)
+            for item in full_cart_items:
+                if scope_type == "all" or \
+                   (scope_type == "category" and item["category"] == scope_val) or \
+                   (scope_type == "product" and item["product_id"] == scope_val):
+                    eligible_amount += item["subtotal"]
 
-    # === 3. 發送 SSE 即時通知 (通知管理員) ===
-    try:
+            if eligible_amount >= threshold and eligible_amount > 0:
+                p_type, p_val = promo.get("promo_type"), float(promo.get("promo_value", 0))
+                discount_amt = eligible_amount * (1 - p_val) if p_type == "discount" else p_val
+                current_total = grand_subtotal - discount_amt
+                
+                if current_total < best_final_total:
+                    best_final_total = max(0, current_total)
+                    applied_promo = {"title": promo.get("title"), "discount_value": round(discount_amt, 2)}
+
+        final_total = round(best_final_total)
+        discount_amount = round(grand_subtotal - final_total, 2)
+
+        # 3. 存入訂單
+        order_id = str(uuid.uuid4())[:8]
+        order_data = {
+            "order_id": order_id,
+            "username": username,
+            "email": gmail,
+            "products": cart,
+            "subtotal": grand_subtotal,
+            "discount_amount": discount_amount,
+            "total": final_total,
+            "promo_info": applied_promo,
+            "pickup_time": pickup_time,
+            "note": note,
+            "status": "pending",
+            "created_at": datetime.now(timezone.utc)
+        }
+        orders_collection.insert_one(order_data)
+
+        # 4. SSE 即時通知管理員
         msg_payload = json.dumps({
             "order_id": order_id,
-            "total": total,
-            "time": datetime.now().strftime("%H:%M")
+            "total": final_total,
+            "time": datetime.now(tw_tz).strftime("%H:%M")
         })
         announcer.announce(format_sse(data=msg_payload, event="new_order"))
-    except Exception as sse_err:
-        print(f"SSE 通知發送失敗: {sse_err}") 
 
-    # === 4. 清空購物車並回傳 ===
-    session.pop("cart")
+        session.pop("cart")
+        return jsonify({
+            "message": "結帳成功！",
+            "order_id": order_id,
+            "final_total": final_total,
+            "promo_applied": applied_promo["title"] if applied_promo else "無"
+        })
 
-    return jsonify({
-        "message": f"結帳成功！訂單編號：{order_id}",
-        "order_id": order_id,
-        "total": total,
-        "note": note,
-        "created_at": order_data["created_at"].isoformat()
-    })
+    except Exception as e:
+        # 回滾庫存
+        for pid, q in deducted_log:
+            products_collection.update_one({"_id": ObjectId(pid)}, {"$inc": {"stock": q}})
+        return jsonify({"message": f"結帳失敗：{str(e)}"}), 400

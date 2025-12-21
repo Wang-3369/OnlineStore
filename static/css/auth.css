@@ -1,0 +1,150 @@
+/* 引入字體並設定背景 */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
+
+.auth-page-body {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: calc(100vh - 160px); /* 扣除 header 和 footer 的概估高度 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 40px 0; /* 增加上下間距 */
+}
+
+/* ===== 核心容器 ===== */
+.login-container {
+    width: 90%;
+    max-width: 420px;
+    padding: 40px;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    text-align: center;
+    box-sizing: border-box;
+    /* 確保他在 base.html 下不會被 header 擋住 */
+    margin: 20px auto; 
+}
+
+/* ===== 標題與副標題 ===== */
+.login-container h2 {
+    margin: 0 0 10px 0;
+    font-size: 30px;
+    color: #2d3436;
+    font-weight: 700;
+}
+
+.login-container p {
+    color: #636e72;
+    margin-bottom: 30px;
+    font-size: 14px;
+}
+
+/* ===== 通用表單樣式 (登入 & 註冊) ===== */
+#login-form, #register-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-group {
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #444;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #dfe6e9;
+    border-radius: 10px;
+    font-size: 16px;
+    background-color: #f9f9f9;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+.form-group input:focus {
+    background-color: #fff;
+    border-color: #007bff;
+    box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.1);
+    outline: none;
+}
+
+/* ===== 按鈕樣式 ===== */
+button[type="submit"] {
+    margin-top: 10px;
+    padding: 14px;
+    background: #007bff;
+    border: none;
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.2s, background 0.2s;
+}
+
+button[type="submit"]:hover {
+    background: #0056d2;
+    transform: translateY(-1px);
+}
+
+button[type="submit"]:active {
+    transform: translateY(1px);
+}
+
+/* ===== 分隔線 (用於 Google 登入前) ===== */
+.divider {
+    margin: 25px 0;
+    display: flex;
+    align-items: center;
+    color: #b2bec3;
+    font-size: 12px;
+}
+
+.divider::before, .divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: #dfe6e9;
+    margin: 0 10px;
+}
+
+/* ===== Google 登入按鈕美化 ===== */
+.google-login-btn {
+    display: inline-block;
+    transition: opacity 0.2s;
+}
+
+.google-login-btn:hover {
+    opacity: 0.85;
+}
+
+.google-login-btn img {
+    width: 100%;
+    max-width: 240px;
+}
+
+/* ===== 下方連結文字 ===== */
+.auth-footer {
+    margin-top: 25px;
+    font-size: 14px;
+    color: #636e72;
+}
+
+.auth-footer a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.auth-footer a:hover {
+    text-decoration: underline;
+}

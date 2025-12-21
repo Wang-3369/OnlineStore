@@ -1,10 +1,13 @@
-/* 進度條樣式 */
+/* 進度條容器 */
 .progress-track {
     display: flex;
-    margin: 20px 0;
+    margin: 30px 0;
     position: relative;
     justify-content: space-between;
+    align-items: center;
 }
+
+/* 進度條底線 */
 .progress-track::before {
     content: '';
     position: absolute;
@@ -16,23 +19,167 @@
     z-index: 0;
     transform: translateY(-50%);
 }
+
+/* 進度節點樣式 */
 .step {
     background: #fff;
     z-index: 1;
-    padding: 5px 15px;
+    padding: 6px 18px;
     border-radius: 20px;
     border: 2px solid #e0e0e0;
     color: #999;
-    font-size: 0.9em;
+    font-size: 0.85em;
     font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
+
+/* 當前進度 */
 .step.active {
     border-color: #667eea;
     color: #667eea;
     background: #eef2ff;
 }
+
+/* 已完成進度 */
 .step.completed {
     border-color: #48bb78;
     color: white;
     background: #48bb78;
+}
+
+/* 訂單區塊基礎樣式 */
+.order-block {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 狀態顏色條 (側邊標示) */
+.status-pending { border-left: 6px solid #f6ad55; }   /* 橘色 */
+.status-accepted { border-left: 6px solid #4299e1; }  /* 藍色 */
+.status-completed { border-left: 6px solid #48bb78; } /* 綠色 */
+.status-rejected { border-left: 6px solid #f56565; opacity: 0.8; } /* 紅色 */
+
+/* ====== 評論按鈕 ====== */
+.review-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: transform 0.2s, opacity 0.2s;
+}
+
+.review-btn:hover {
+    transform: translateY(-2px);
+    opacity: 0.9;
+}
+
+.review-btn:disabled {
+    background: #cbd5e0;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ====== 評論彈窗 (Modal) ====== */
+.modal {
+    position: fixed;
+    top: 0; 
+    left: 0;
+    width: 100%; 
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    display: none; /* 由 JS 控制切換 */
+    z-index: 10000;
+}
+
+.modal-content {
+    background: white;
+    padding: 30px;
+    width: 90%;
+    max-width: 400px;
+    border-radius: 16px;
+    margin: 15vh auto;
+    text-align: center;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+#review-text {
+    width: 100%;
+    padding: 12px;
+    margin: 15px 0;
+    border: 2px solid #edf2f7;
+    border-radius: 8px;
+    resize: vertical;
+    font-family: inherit;
+}
+
+#review-text:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+/* 星星評分樣式 */
+#star-rating {
+    margin: 10px 0;
+    font-size: 35px;
+    cursor: pointer;
+    user-select: none;
+}
+
+#star-rating span {
+    color: #e2e8f0;
+    transition: color 0.2s, transform 0.2s;
+    display: inline-block;
+}
+
+#star-rating span.selected,
+#star-rating span:hover,
+#star-rating span:hover ~ span {
+    color: #ecc94b; /* 金黃色 */
+}
+
+/* 管理者回覆區塊 */
+.review-reply {
+    background-color: #f7fafc;
+    border-left: 4px solid #a0aec0;
+    padding: 12px;
+    margin-top: 15px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    color: #4a5568;
+}
+
+/* Modal 按鈕排版 */
+.modal-footer {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+#submit-review {
+    background-color: #48bb78;
+    color: white;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+#close-review {
+    background-color: #edf2f7;
+    color: #4a5568;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
 }

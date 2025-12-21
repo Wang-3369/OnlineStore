@@ -1,56 +1,85 @@
 document.addEventListener("DOMContentLoaded", async () => {
     const container = document.getElementById("promo-items");
+    const uploadForm = document.getElementById("upload-form");
 
-    // 取得促銷圖片清單
+    // 1. 初始化監聽：範圍切換與折扣類型提示
+    document.getElementById("scope_type")?.addEventListener("change", handleScopeChange);
+    document.querySelector('select[name="promo_type"]')?.addEventListener("change", (e) => {
+        const hint = document.getElementById('promo-hint');
+        if (!hint) return;
+        hint.innerText = e.target.value === 'discount' ? 
+            "提示：請輸入 0 到 1 之間的小數 (例如 0.9)" : "提示：請輸入欲扣除的整數金額";
+    });
+
+    // 2. 載入列表功能
     async function loadPromotions() {
-        container.innerHTML = "";
+        container.innerHTML = "載入中...";
         const res = await fetch("/api/promotions");
         const promotions = await res.json();
+        container.innerHTML = "";
 
         promotions.forEach(p => {
+            const typeText = p.promo_type === 'discount' ? '打折' : '折價';
+            const valSuffix = p.promo_type === 'discount' ? '倍' : '元';
+            let scopeText = p.scope_type === 'all' ? '全館' : (p.scope_type === 'category' ? `類別: ${p.scope_value}` : `特定商品`);
+
             const div = document.createElement("div");
             div.className = "promo-item";
-
             div.innerHTML = `
-                <img src="/api/promotions/image/${p.image_id}" alt="promotion">
-                <button data-id="${p._id}" class="delete-btn">刪除</button>
-            `;
-
+                <img src="/api/promotions/image/${p.image_id}">
+                <div class="promo-info">
+                    <h4>${p.title} <span class="badge">${scopeText}</span></h4>
+                    <p>門檻：符合條件滿 ${p.threshold} 元 | 優惠：${typeText} ${p.promo_value}${valSuffix}</p>
+                </div>
+                <button data-id="${p._id}" class="delete-btn">刪除</button>`;
             container.appendChild(div);
         });
     }
 
-    await loadPromotions();
-
-    // 刪除功能
+    // 3. 刪除與上傳事件
     container.addEventListener("click", async (e) => {
         if (e.target.classList.contains("delete-btn")) {
-            const id = e.target.dataset.id;
-            if (!confirm("確定要刪除這張圖片？")) return;
-
-            const res = await fetch(`/api/promotions/${id}`, { method: "DELETE" });
-            const data = await res.json();
-            alert(data.message);
-            await loadPromotions();
+            if (!confirm("確定刪除？")) return;
+            await fetch(`/api/promotions/${e.target.dataset.id}`, { method: "DELETE" });
+            loadPromotions();
         }
     });
 
-    // 上傳功能
-    const uploadForm = document.getElementById("upload-form");
-    uploadForm.addEventListener("submit", async (e) => {
+    uploadForm?.addEventListener("submit", async (e) => {
         e.preventDefault();
-        const formData = new FormData(uploadForm);
-
-        const res = await fetch("/api/promotions/upload", {
-            method: "POST",
-            body: formData
-        });
-
-        const data = await res.json();
-        alert(data.message);
+        const res = await fetch("/api/promotions/upload", { method: "POST", body: new FormData(uploadForm) });
         if (res.ok) {
+            alert("發布成功");
             uploadForm.reset();
-            await loadPromotions();
+            loadPromotions();
         }
     });
+
+    loadPromotions();
 });
+
+// 4. 範圍連動選單邏輯 (核心修正)
+async function handleScopeChange() {
+    const type = document.getElementById("scope_type").value;
+    const box = document.getElementById("scope-value-container");
+    const select = document.getElementById("scope_value_select");
+
+    if (type === "all") {
+        box.style.display = "none";
+        return;
+    }
+
+    box.style.display = "block";
+    select.innerHTML = '<option>載入中...</option>';
+
+    const apiPath = type === "category" ? "/api/admin/categories" : "/api/admin/products_list";
+    const res = await fetch(apiPath);
+    const data = await res.json();
+
+    select.innerHTML = data.map(item => {
+        // 如果是商品，value 存 ID，顯示名稱；如果是類別，兩者皆為名稱
+        const val = type === "product" ? item._id : item;
+        const text = type === "product" ? item.name : item;
+        return `<option value="${val}">${text}</option>`;
+    }).join('');
+}

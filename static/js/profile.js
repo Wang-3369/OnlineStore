@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const cancelBtn = document.getElementById("crop-cancel-btn");
     let cropper = null;
 
-    // ===== 1. 當使用者選擇檔案時 =====
+    // ===== 1. 當使用者選擇檔案時 (啟動裁切) =====
     if (avatarInput) {
         avatarInput.addEventListener("change", (e) => {
             const file = e.target.files[0];
@@ -21,9 +21,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     cropper.destroy();
                 }
 
-                // 初始化 Cropper
+                // 初始化 Cropper.js
                 cropper = new Cropper(imageToCrop, {
-                    aspectRatio: 1,      // 限制裁切比例為 1:1 (正方形/圓形)
+                    aspectRatio: 1,      // 1:1 正方形裁切
                     viewMode: 1,
                     dragMode: 'move',
                     autoCropArea: 0.8,
@@ -38,7 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
             };
             reader.readAsDataURL(file);
             
-            e.target.value = ''; 
+            e.target.value = ''; // 重置 input 讓同一張圖可以重複選
         });
     }
 
@@ -92,12 +92,14 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-
+    // ===== 4. 變更密碼 =====
     const changePwBtn = document.getElementById("change-password");
     if(changePwBtn) {
         changePwBtn.onclick = async () => {
             const old_pw = document.getElementById("old-password").value;
             const new_pw = document.getElementById("new-password").value;
+
+            if (!old_pw || !new_pw) return alert("請填寫舊密碼與新密碼");
 
             const res = await fetch("/api/profile/change_password", {
                 method: "POST",
@@ -109,6 +111,7 @@ document.addEventListener("DOMContentLoaded", () => {
         };
     }
 
+    // ===== 5. 刪除自訂頭像 =====
     const deleteBtn = document.getElementById("delete-avatar");
     if (deleteBtn) {
         deleteBtn.onclick = async () => {
@@ -120,6 +123,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (res.ok) {
                 window.location.reload();
+            }
+        };
+    }
+
+    // ===== 6. 修改 Email 邏輯 =====
+    const changeEmailBtn = document.getElementById("change-email");
+    if (changeEmailBtn) {
+        changeEmailBtn.onclick = async () => {
+            const newEmail = document.getElementById("new-email").value;
+
+            if (!newEmail) return alert("請輸入 Email");
+
+            const res = await fetch("/api/profile/change_email", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: newEmail })
+            });
+
+            const data = await res.json();
+            alert(data.message);
+
+            if (res.ok) {
+                // 更新畫面上顯示的 Email
+                const emailSpan = document.getElementById("current-email");
+                if (emailSpan) emailSpan.textContent = newEmail;
+                document.getElementById("new-email").value = "";
             }
         };
     }
