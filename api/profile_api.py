@@ -1,9 +1,11 @@
-from flask import Blueprint, request, jsonify, session, send_file
+from flask import Blueprint, request, jsonify, session, send_file, make_response
 from database.db import db, users_collection
 from bson.objectid import ObjectId
 from gridfs import GridFS
 import io
+import os
 import uuid
+from utils.image import compress_image
 from werkzeug.security import generate_password_hash, check_password_hash
 
 profile_bp = Blueprint("profile", __name__)
@@ -59,6 +61,7 @@ def change_password():
     return jsonify({"message": "密碼修改成功"})
 
 # 上傳頭像
+# --- upload_avatar 內部修正 ---
 @profile_bp.route("/api/profile/avatar", methods=["POST"])
 @login_required
 def upload_avatar():
@@ -69,16 +72,21 @@ def upload_avatar():
     if file.filename == "" or not allowed_file(file.filename):
         return jsonify({"message": "檔名無效或不支援類型"}), 400
 
-    # 存入 GridFS
-    image_id = fs.put(file, filename=f"{session['username']}_{uuid.uuid4().hex}.{file.filename.rsplit('.',1)[1]}")
+    # 1. 執行壓縮 (頭像 300x300 即可)
+    compressed_io = compress_image(file, max_size=(300, 300), quality=80)
 
-    # 更新使用者資料庫的 avatar 欄位
-    db.users.update_one(
-        {"username": session["username"]},
-        {"$set": {"avatar": str(image_id)}}  # <- 這行更新 avatar
+    # 2. 存入 GridFS (注意這裡要傳 compressed_io 而不是原始的 file)
+    image_id = fs.put(
+        compressed_io, 
+        filename=f"{session['username']}_avatar.jpg", 
+        content_type="image/jpeg"
     )
 
-    # 同步更新 session
+    # 3. 更新資料庫
+    db.users.update_one(
+        {"username": session["username"]},
+        {"$set": {"avatar": str(image_id)}}
+    )
     session["avatar"] = str(image_id)
 
     return jsonify({"message": "頭像更新成功", "avatar": str(image_id)})
@@ -90,14 +98,17 @@ def upload_avatar():
 def get_avatar(avatar_id):
     try:
         file = fs.get(ObjectId(avatar_id))
-        # 根據上傳檔案的類型給正確 mime
-        mimetype = "image/jpeg"
-        if file.filename.lower().endswith(".png"):
-            mimetype = "image/png"
-        elif file.filename.lower().endswith(".gif"):
-            mimetype = "image/gif"
-        return send_file(io.BytesIO(file.read()), mimetype=mimetype, download_name=file.filename)
-    except:
+        
+        # 建立回應物件
+        response = make_response(file.read())
+        response.headers['Content-Type'] = 'image/jpeg'
+        
+        # 套用環境變數中的快取設定
+        cache_timeout = os.getenv("IMAGE_CACHE_TIMEOUT", "86400")
+        response.headers['Cache-Control'] = f'public, max-age={cache_timeout}'
+        
+        return response
+    except Exception as e:
         return jsonify({"error": "圖片不存在"}), 404
     
 @profile_bp.route("/api/profile/delete_avatar", methods=["POST"])
