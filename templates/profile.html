@@ -20,6 +20,20 @@
         </div>
     </div>
 
+    <h3 class="profile-section-title">基本資料</h3>
+    <div class="email-section" style="margin-bottom: 25px;">
+        <p style="font-size: 0.9em; color: #718096; margin-bottom: 8px;">
+            目前 Email: <span id="current-email" style="color: #2d3748; font-weight: 600;">{{ user.email or "未設定" }}</span>
+        </p>
+        
+        <div style="display: flex; gap: 10px;">
+            <input type="email" id="new-email" class="profile-input" placeholder="輸入新 Email" style="flex: 1; margin-bottom: 0;">
+            <button id="change-email" class="btn-secondary" style="white-space: nowrap; padding: 0 15px;">更新 Email</button>
+        </div>
+    </div>
+
+    <hr style="border: 0; border-top: 1px solid #edf2f7; margin: 20px 0;">
+
     <h3 class="profile-section-title">安全性設定</h3>
     
     <label for="old-password" style="font-size: 0.9em; color: #718096; margin-bottom: 5px; display:block;">舊密碼</label>

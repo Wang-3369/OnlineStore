@@ -66,7 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // 新增一個計算折扣的函式
     async function calculatePromoPreview() {
         try {
-            // 同時獲取購物車與促銷資訊
+            console.log("開始獲取購物車與促銷資料...");
             const [cartRes, promoRes] = await Promise.all([
                 fetch("/api/cart"),
                 fetch("/api/promotions")
@@ -74,70 +74,69 @@ document.addEventListener("DOMContentLoaded", () => {
             
             const cartData = await cartRes.json();
             const promotions = await promoRes.json();
-            const cart = cartData.cart || {};
+            
+            // 防呆：確保 promotions 是陣列
+            if (!Array.isArray(promotions)) {
+                console.error("促銷資料格式錯誤，預期為陣列:", promotions);
+                return null;
+            }
 
-            // 轉換購物車格式
+            const cart = cartData.cart || {};
             const cartItems = Object.entries(cart).map(([id, item]) => ({
                 id: id,
                 name: item.name,
-                price: parseFloat(item.price),
-                quantity: parseInt(item.quantity),
-                category: item.category ? item.category.trim() : "", // 關鍵：確保有類別資訊
-                subtotal: parseFloat(item.price) * parseInt(item.quantity)
+                price: parseFloat(item.price) || 0,
+                quantity: parseInt(item.quantity) || 0,
+                category: item.category ? item.category.trim() : "",
+                subtotal: (parseFloat(item.price) || 0) * (parseInt(item.quantity) || 0)
             }));
 
             const grandSubtotal = cartItems.reduce((sum, item) => sum + item.subtotal, 0);
             if (grandSubtotal === 0) return null;
 
             let bestPromo = null;
-            let minFinalTotal = grandSubtotal;
+            let maxDiscountAmt = 0; // 改用最大折扣額來找最優方案
 
             promotions.forEach(p => {
                 let eligibleAmount = 0;
                 const scopeType = p.scope_type || 'all';
-                const scopeValue = (p.scope_value || '').toString().trim();
+                // 確保 scopeValue 轉為字串進行比較
+                const scopeValue = p.scope_value ? p.scope_value.toString().trim() : "";
 
-                // 根據範疇過濾適用商品金額
                 cartItems.forEach(item => {
                     let isMatch = false;
-                    if (scopeType === 'all') {
-                        isMatch = true;
-                    } else if (scopeType === 'category' && item.category === scopeValue) {
-                        isMatch = true;
-                    } else if (scopeType === 'product' && item.id === scopeValue) {
-                        isMatch = true;
-                    }
+                    if (scopeType === 'all') isMatch = true;
+                    else if (scopeType === 'category' && item.category === scopeValue) isMatch = true;
+                    else if (scopeType === 'product' && item.id === scopeValue) isMatch = true;
 
                     if (isMatch) eligibleAmount += item.subtotal;
                 });
 
-                // 判斷門檻
                 const threshold = parseFloat(p.threshold || 0);
                 if (eligibleAmount >= threshold && eligibleAmount > 0) {
                     let discountAmt = 0;
                     if (p.promo_type === 'discount') {
-                        // 折扣額 = 適用商品總額 * (1 - 折扣率)
+                        // 例如 0.9 折，折扣額 = 100 * (1 - 0.9) = 10
                         discountAmt = eligibleAmount * (1 - parseFloat(p.promo_value));
                     } else if (p.promo_type === 'minus') {
                         discountAmt = parseFloat(p.promo_value);
                     }
 
-                    const currentFinalTotal = grandSubtotal - discountAmt;
-                    
-                    if (currentFinalTotal < minFinalTotal) {
-                        minFinalTotal = currentFinalTotal;
+                    if (discountAmt > maxDiscountAmt) {
+                        maxDiscountAmt = discountAmt;
                         bestPromo = {
                             title: p.title,
-                            finalTotal: Math.max(0, Math.round(minFinalTotal)),
+                            finalTotal: Math.max(0, Math.round(grandSubtotal - discountAmt)),
                             discountAmount: Math.round(discountAmt)
                         };
                     }
                 }
             });
 
+            console.log("計算出的最優折扣:", bestPromo);
             return bestPromo;
         } catch (err) {
-            console.error("預覽折扣失敗", err);
+            console.error("預覽折扣函式內部崩潰:", err);
             return null;
         }
     }
@@ -152,52 +151,48 @@ openBtn?.addEventListener("click", async () => {
         return;
     }
 
-    // 顯示載入中狀態
-    document.getElementById("modal-total-display").innerText = "計算折扣中...";
+    // 先打開彈窗，讓使用者看到在動
     modal.style.display = "block";
+    document.getElementById("modal-total-display").innerText = "計算折扣中...";
 
-    // 1. 獲取折扣預覽
-    const bestPromo = await calculatePromoPreview(subtotal);
-    
-    const promoSection = document.getElementById("promo-preview-section");
-    const subtotalDisplay = document.getElementById("modal-subtotal-display");
-    const totalDisplay = document.getElementById("modal-total-display");
+    try {
+        console.log("開始計算折扣...");
+        const bestPromo = await calculatePromoPreview(); // 移除 subtotal 參數，因為函式內沒用到
+        console.log("折扣計算完成:", bestPromo);
 
-    if (bestPromo && bestPromo.discountAmount > 0) {
-        promoSection.style.display = "block";
-        document.getElementById("promo-title").innerText = bestPromo.title || "限時優惠";
-        document.getElementById("discount-detail").innerText = `- NT$ ${bestPromo.discountAmount}`;
-        
-        subtotalDisplay.innerText = `原價：NT$ ${subtotal}`;
-        subtotalDisplay.style.display = "block";
-        totalDisplay.innerText = `實付總計：NT$ ${bestPromo.finalTotal}`;
-        totalDisplay.style.color = "#e74c3c"; // 變紅強調
-        totalDisplay.style.fontSize = "1.5rem";
-    } else {
-        promoSection.style.display = "none";
-        subtotalDisplay.style.display = "none";
-        totalDisplay.innerText = `總計：NT$ ${subtotal}`;
-        totalDisplay.style.color = "#333";
+        const promoSection = document.getElementById("promo-preview-section");
+        const subtotalDisplay = document.getElementById("modal-subtotal-display");
+        const totalDisplay = document.getElementById("modal-total-display");
+
+        if (bestPromo && bestPromo.discountAmount > 0) {
+            promoSection.style.display = "block";
+            document.getElementById("promo-title").innerText = bestPromo.title || "限時優惠";
+            document.getElementById("discount-detail").innerText = `- NT$ ${bestPromo.discountAmount}`;
+            subtotalDisplay.innerText = `原價：NT$ ${subtotal}`;
+            subtotalDisplay.style.display = "block";
+            totalDisplay.innerText = `實付總計：NT$ ${bestPromo.finalTotal}`;
+        } else {
+            promoSection.style.display = "none";
+            subtotalDisplay.style.display = "none";
+            totalDisplay.innerText = `總計：NT$ ${subtotal}`;
+        }
+    } catch (e) {
+        console.error("折扣流程出錯:", e);
+        document.getElementById("modal-total-display").innerText = `總計：NT$ ${subtotal}`;
     }
 
-        // 2. 獲取使用者現有的 Email (新增部分)
-        try {
-            const res = await fetch("/api/profile/info"); // 我們需要一個能回傳使用者資料的 API
-            if (res.ok) {
-                const userData = await res.json();
-                const gmailInput = document.getElementById("user-gmail");
-                if (userData.email) {
-                    gmailInput.value = userData.email;
-                    // 可以加個提示或樣式讓使用者知道這是帶入的
-                    gmailInput.style.backgroundColor = "#e8f0fe"; 
-                }
+    // 將獲取 Email 放在最後，且不讓它影響主流程
+    fetch("/api/profile/info")
+        .then(res => res.json())
+        .then(userData => {
+            const gmailInput = document.getElementById("user-gmail");
+            if (userData && userData.email && gmailInput) {
+                gmailInput.value = userData.email;
+                gmailInput.style.backgroundColor = "#e8f0fe";
             }
-        } catch (err) {
-            console.log("無法獲取使用者預設 Email");
-        }
-
-        modal.style.display = "block";
-    });
+        })
+        .catch(err => console.log("無法獲取預設 Email，不影響結帳"));
+});
 
     // 2. 關閉彈窗 (點擊 X 或點擊背景)
     closeBtn?.addEventListener("click", () => modal.style.display = "none");

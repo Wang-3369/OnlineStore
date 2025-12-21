@@ -4,8 +4,8 @@
 
     document.addEventListener("DOMContentLoaded", () => {
         const currentUser = document.body.dataset.username;
-        const userRole = "{{ session.get('role', '') }}"; 
-        
+        const userRole = document.body.dataset.role; 
+        console.log("當前使用者身分:", userRole);
         if (!currentUser) return; 
 
         const globalSource = new EventSource("/events");
@@ -44,14 +44,27 @@
                 const data = JSON.parse(e.data);
 
                 if (data.username !== currentUser) {
-                    // 顯示頭像紅點 + 「接單系統」按鈕紅點 (透過 data-url 尋找)
+                    // 1. 顯示紅點引導
                     showDot("/admin/orders"); 
-                    
-                    alertAudio.play().catch(() => console.log("等待互動後播放"));
 
+                    // 2. 嘗試播放聲音
+                    const playAttempt = alertAudio.play();
+
+                    if (playAttempt !== undefined) {
+                        playAttempt.then(() => {
+                            console.log("音效播放成功");
+                        }).catch(error => {
+                            console.log("自動播放被阻擋，將透過 alert 引導使用者互動");
+                        });
+                    }
+
+                    // 3. 跳出警告視窗 (這會阻塞畫面，強制使用者點擊)
                     if (typeof fetchOrders === "function") {
+                        // 如果在接單頁面，直接更新列表並提示
                         fetchOrders();
+                        alert(`【新訂單通知】您有一筆新訂單！單號：#${data.order_id}`);
                     } else {
+                        // 如果在其他頁面，單純提示
                         alert(`[店務通知] 有新訂單來了！單號：#${data.order_id}`);
                     }
                 }
