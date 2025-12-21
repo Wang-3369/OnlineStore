@@ -189,14 +189,23 @@ def favorites_page():
     return render_template("favorites.html")
 
 # SSE 監聽路由
+import queue
+
 @app.route('/events')
 def sse_stream():
     def stream():
         messages = announcer.listen()
         while True:
-            msg = messages.get() # 這會阻塞直到有新訊息
-            yield msg
-            
+            try:
+                # 使用 timeout，每 20 秒強迫醒來一次發送心跳，避免 Thread 永久鎖死
+                msg = messages.get(timeout=20) 
+                yield msg
+            except queue.Empty:
+                # 發送一個空的心跳包，維持連線並釋放 Thread 控制權
+                yield "data: heartbeat\n\n"
+            except Exception:
+                break # 發生其他錯誤（如斷線）就跳出
+                
     return Response(stream(), mimetype='text/event-stream')
 
 # 啟動 Flask
