@@ -4,20 +4,64 @@
 
 <div class="promo-admin-container">
 
-    <!-- 上傳區 -->
     <div class="upload-box">
-        <h3>上傳促銷圖片</h3>
-        <form id="upload-form" enctype="multipart/form-data" method="POST" action="/api/promotions/upload">
-            <input type="file" name="image" accept="image/*" required>
-            <button type="submit">上傳</button>
-        </form>
-    </div>
+    <h3>新增促銷活動</h3>
+    <form id="upload-form">
+        <div class="form-group">
+            <label>活動名稱：</label>
+            <input type="text" name="title" placeholder="例如：週年慶全館 9 折" required>
+        </div>
+        <div class="form-group">
+            <label>適用範圍：</label>
+            <select name="scope_type" id="scope_type" onchange="handleScopeChange()">
+                <option value="all">全館商品</option>
+                <option value="category">特定類別</option>
+                <option value="product">特定商品</option>
+            </select>
+        </div>
 
-    <!-- 促銷圖片列表 -->
+        <div id="scope-value-container" class="form-group" style="display:none;">
+            <label id="scope-value-label">選擇內容：</label>
+            <select name="scope_value" id="scope_value_select">
+                </select>
+        </div>
+        <div id="category-input" class="form-group" style="display:none;">
+            <label>指定類別名稱：</label>
+            <input type="text" name="scope_value_category" placeholder="例如：主食、飲品">
+        </div>
+
+        <div id="product-input" class="form-group" style="display:none;">
+            <label>指定商品名稱：</label>
+            <input type="text" name="scope_value_product" placeholder="輸入商品完整名稱">
+        </div>
+        <div class="form-group">
+            <label>促銷圖片：</label>
+            <input type="file" name="image" accept="image/*" required>
+        </div>
+        <div class="form-group">
+            <label>折扣類型：</label>
+            <select name="promo_type">
+                <option value="discount">打折 (例如: 0.9 = 9折)</option>
+                <option value="minus">直接折價 (例如: 50 = 現折50元)</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>折扣數值：</label>
+            <input type="number" name="promo_value" id="promo_value_input" step="0.01" placeholder="例如：打 9 折輸入 0.9，折 50 元輸入 50" required>
+            <small id="promo-hint" style="color: #666;"></small>
+        </div>
+        <div class="form-group">
+            <label>消費門檻 (低消)：</label>
+            <input type="number" name="threshold" value="0">
+        </div>
+        <button type="submit" class="submit-btn">發布促銷活動</button>
+    </form>
     <div class="promo-list">
         <h3>促銷圖片列表</h3>
         <div id="promo-items" class="promo-items"></div>
     </div>
+
+</div>
 
 </div>
 

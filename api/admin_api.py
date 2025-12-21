@@ -1,6 +1,7 @@
-from flask import Blueprint, request, jsonify, session
+from flask import Blueprint, request, jsonify, session, current_app
 from database.db import users_collection, orders_collection,products_collection
 from bson.objectid import ObjectId
+from flask_mail import Message
 
 admin_bp = Blueprint("admin", __name__)
 
@@ -93,6 +94,8 @@ def get_all_orders():
 @admin_bp.route("/api/admin/order/status", methods=["POST"])
 @admin_required
 def update_order_status():
+    from app import mail  # 重要：從主程式導入 mail 實例
+    
     data = request.json
     order_id = data.get("order_id")
     new_status = data.get("status")
@@ -100,26 +103,61 @@ def update_order_status():
     if not order_id or not new_status:
         return jsonify({"message": "參數錯誤"}), 400
 
-    # 取得訂單
+    # 取得訂單詳情
     order = orders_collection.find_one({"order_id": order_id})
     if not order:
         return jsonify({"message": "找不到訂單"}), 404
 
-    # 拒絕訂單回補庫存 (只回補非已拒絕訂單)
+    # 1. 拒絕訂單回補庫存
     if new_status == "rejected" and order.get("status") != "rejected":
         for pid, item in order.get("products", {}).items():
             products_collection.update_one(
-                {"_id": ObjectId(pid)},  # <-- 改這裡
+                {"_id": ObjectId(pid)},
                 {"$inc": {"stock": item["quantity"]}}
             )
 
-    # 更新訂單狀態
+    # 2. 更新資料庫中的訂單狀態
     result = orders_collection.update_one(
         {"order_id": order_id},
         {"$set": {"status": new_status}}
     )
 
     if result.modified_count > 0:
+        # 3. 如果「接受訂單」，發送 Email 給顧客
+        if new_status == "accepted":
+            send_status_email(mail, order, "訂單已接受", "您的訂單已被商家接受，正在製作中！")
+        
+        # (選填) 如果想在「完成」時也發信，可以加這段：
+        elif new_status == "completed":
+            send_status_email(mail, order, "餐點已完成", "您的餐點已準備好，請儘速前往取餐。")
+
         return jsonify({"message": f"訂單狀態已更新為 {new_status}"})
     else:
-        return jsonify({"message": "訂單狀態更新失敗"}), 400
+        return jsonify({"message": "訂單狀態更新失敗或未變動"}), 400
+
+# 輔助函式：發送郵件
+def send_status_email(mail, order, subject_title, status_text):
+    try:
+        # 從訂單中獲取顧客 Email (假設您的訂單 document 有存 email 欄位)
+        # 如果訂單沒存，可能要根據 order['username'] 去 users_collection 查
+        customer_email = order.get("email")
+        
+        if not customer_email:
+            # 如果訂單沒存 Email，去使用者表查一次
+            user = users_collection.find_one({"username": order.get("username")})
+            customer_email = user.get("email") if user else None
+
+        if customer_email:
+            msg = Message(
+                subject=f"【OnlineStoreOcean】{subject_title} (單號: {order['order_id']})",
+                recipients=[customer_email],
+                body=f"親愛的 {order.get('username')} 您好：\n\n{status_text}\n\n"
+                     f"訂單單號：{order['order_id']}\n"
+                     f"預計取餐時間：{order.get('pickup_time', '未指定')}\n"
+                     f"總金額：${order.get('total')}\n\n"
+                     f"感謝您的支持！"
+            )
+            mail.send(msg)
+            print(f"成功發送郵件至 {customer_email}")
+    except Exception as e:
+        print(f"郵件發送錯誤: {e}")

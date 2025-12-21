@@ -1,6 +1,7 @@
 import os
 from flask import Flask, render_template, session, redirect
 # 導入各模組的 Blueprint
+from flask_mail import Mail, Message
 from api.product_api import product_bp
 from api.auth_api import auth_bp
 from api.admin_api import admin_bp
@@ -18,6 +19,16 @@ from dotenv import load_dotenv
 app = Flask(__name__)
 # 設定 session 用的 secret key，從 .env 讀取，若沒有則用預設
 app.secret_key = os.getenv("SECRET_KEY", "mydefaultsecret")
+
+# 郵件配置
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'onlinestore.01257@gmail.com'
+app.config['MAIL_PASSWORD'] = 'dczihbxveykeclnt' # 不是一般的密碼
+app.config['MAIL_DEFAULT_SENDER'] = ('OnlineStoreOcean', 'onlinestore.01257@gmail.com')
+
+mail = Mail(app)
 
 # 註冊各個 API blueprint
 app.register_blueprint(auth_bp)
@@ -73,19 +84,28 @@ def orders_page():
         return "請先登入", 403
 
     username = session.get("username")
-    orders_cursor = orders_collection.find({"username": username})
+    # 建議加上排序，讓最新訂單排在最前面
+    orders_cursor = orders_collection.find({"username": username}).sort("created_at", -1)
     orders = []
 
     for order in orders_cursor:
         order["_id"] = str(order["_id"])
-        order["products"] = dict(order["products"])
+        
+        # --- 安全修正：處理 products 欄位 ---
+        # 如果不存在 "products" 鍵值，則回傳空字典 {}
+        raw_products = order.get("products", {})
+        order["products"] = dict(raw_products)
 
-        # 查詢使用者是否已對此訂單評論過
-        review = product_reviews_collection.find_one({"username": username, "order_id": order["order_id"]})
+        # 查詢使用者是否已對此訂單評論過 (使用 .get 預防 order_id 缺失)
+        review = product_reviews_collection.find_one({
+            "username": username, 
+            "order_id": order.get("order_id")
+        })
+        
         if review:
             order["review"] = {
-                "content": review["content"],
-                "rating": review["rating"]
+                "content": review.get("content", ""),
+                "rating": review.get("rating", 0)
             }
         else:
             order["review"] = None

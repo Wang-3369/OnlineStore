@@ -1,61 +1,67 @@
-.review-page-container {
-    max-width: 900px;
-    margin: auto;
+/* promotions.css */
+.promo-admin-container {
+    max-width: 800px;
+    margin: 20px auto;
     padding: 20px;
+    background: #f9f9f9;
+    border-radius: 12px;
 }
 
-#review-section {
-    margin-top: 20px;
+.upload-box {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
 }
 
-.review-item {
-    padding: 10px 5px;
-    border-bottom: 1px solid #eee;
+.form-group {
+    margin-bottom: 15px;
 }
 
-.review-header {
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.form-group input, .form-group select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.promo-item {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    background: white;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    border-left: 5px solid #ff6600;
 }
 
-.review-header strong {
-    color: #333;
-}
-
-.review-rating {
-    color: #ffcc00;
-}
-
-.review-reply {
-    background-color: #f0f0f0;
-    padding: 0.5rem;
-    margin-top: 0.3rem;
+.promo-item img {
+    width: 120px;
+    height: 70px;
+    object-fit: cover;
+    margin-right: 20px;
     border-radius: 4px;
 }
 
-.delete-btn, .reply-btn {
-    margin-top: 0.3rem;
-    margin-right: 5px;
-    padding: 5px 10px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    color: #fff;
+.promo-info {
+    flex-grow: 1;
 }
+
+.promo-info h4 { margin: 0; color: #333; }
+.promo-info p { margin: 5px 0; font-size: 0.9em; color: #666; }
 
 .delete-btn {
-    background-color: #e74c3c;
-}
-
-.delete-btn:hover {
-    background-color: #c0392b;
-}
-
-.reply-btn {
-    background-color: #3498db;
-}
-
-.reply-btn:hover {
-    background-color: #2980b9;
+    background: #ff4757;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
 }

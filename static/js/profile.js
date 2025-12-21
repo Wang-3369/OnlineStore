@@ -50,3 +50,28 @@ if (deleteBtn) {
     };
 }
 
+// 修改 Email 邏輯
+const changeEmailBtn = document.getElementById("change-email");
+if (changeEmailBtn) {
+    changeEmailBtn.onclick = async () => {
+        const newEmail = document.getElementById("new-email").value;
+
+        if (!newEmail) return alert("請輸入 Email");
+
+        const res = await fetch("/api/profile/change_email", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: newEmail })
+        });
+
+        const data = await res.json();
+        alert(data.message);
+
+        if (res.ok) {
+            // 更新畫面上顯示的 Email
+            const emailSpan = document.getElementById("current-email");
+            if (emailSpan) emailSpan.textContent = newEmail;
+            document.getElementById("new-email").value = "";
+        }
+    };
+}

@@ -1,107 +1,140 @@
+/* 基礎容器優化 */
 .product-detail-container {
     display: flex;
-    gap: 2em;
-    padding: 2em;
-    max-width: 1200px;
-    margin: auto;
+    gap: 50px;
+    padding: 40px;
+    max-width: 1000px;
+    margin: 40px auto;
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.06);
+    align-items: center; /* 垂直居中 */
 }
 
-.image-section {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
+/* 資訊區塊佈局 */
+.product-info {
+    flex: 1.2;
+    order: 1; /* 文字在左 (如果你希望圖片在左，可改為 2) */
 }
-
-.product-image {
-    width: 300px !important;
-    height: 300px !important;
-    object-fit: contain !important;
-    border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-    display: block;
-}
-
-
-
-
-.product-image img {
-    width: 100%;        /* 撐滿容器 */
-    height: auto;       /* 保持比例 */
-    max-height: 300px;  /* 高度限制 */
-    object-fit: contain; 
-    display: block;
-    margin: 0 auto;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-}
-
-
-
-@media screen and (max-width: 600px) {
-    .product-detail-container {
-        flex-direction: column;
-        align-items: center;
-        max-width: 90%;
-    }
-    .product-image {
-        width: 100%;
-    }
-    .product-image img {
-        max-height: 250px;
-    }
-}
-
 
 .product-info h2 {
-    margin-bottom: 20px;
-    font-size: 28px;
-    color: #333;
+    margin-bottom: 15px;
+    font-size: 32px;
+    color: #2d3436;
+    font-weight: 700;
 }
 
 .product-info p {
-    font-size: 16px;
-    margin: 8px 0;
-    color: #555;
+    font-size: 17px;
+    margin: 12px 0;
+    color: #636e72;
+    line-height: 1.6;
 }
 
+.product-info strong {
+    color: #2d3436;
+}
+
+/* 價格標示突出 */
+.product-info p:nth-child(2) {
+    font-size: 24px;
+    color: #e74c3c;
+    font-weight: bold;
+}
+
+/* 數量輸入框美化 */
 .product-info input[type="number"] {
-    width: 60px;
-    padding: 5px;
-    margin-left: 5px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+    width: 70px;
+    padding: 8px 12px;
+    margin: 10px 0;
+    border: 2px solid #eee;
+    border-radius: 8px;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.3s;
 }
 
-.product-info button {
-    margin-top: 15px;
-    padding: 10px 20px;
-    background-color: #ff7f50;
+.product-info input[type="number"]:focus {
+    border-color: #ff7f50;
+}
+
+/* 加入購物車按鈕：現代化漸層設計 */
+#add-cart-btn {
+    margin-top: 25px;
+    width: 100%;
+    max-width: 250px;
+    padding: 15px 30px;
+    background: linear-gradient(135deg, #ff7f50, #ff6348);
     color: white;
     border: none;
-    border-radius: 6px;
+    border-radius: 12px;
     cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s ease;
+    font-size: 18px;
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 6px 20px rgba(255, 127, 80, 0.3);
 }
 
-.product-info button:hover {
-    background-color: #e0663c;
+#add-cart-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(255, 127, 80, 0.4);
+    background: linear-gradient(135deg, #ff6348, #e05530);
 }
 
+#add-cart-btn:active {
+    transform: translateY(0);
+}
+
+/* 圖片區塊美化 */
+.image-section {
+    flex: 1;
+    order: 2;
+    display: flex;
+    justify-content: center;
+}
+
+.product-image {
+    width: 100%;
+    max-width: 400px;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 15px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+}
+
+/* 回列表連結 */
 .product-info a {
     display: inline-block;
-    margin-top: 20px;
-    color: #3498db;
+    margin-top: 25px;
+    color: #b2bec3;
     text-decoration: none;
+    font-size: 14px;
+    transition: color 0.3s;
 }
 
 .product-info a:hover {
-    text-decoration: underline;
+    color: #3498db;
 }
 
-.product-info button:active {
-    transform: translateY(1px) scale(0.97); /* 縮小並往下微位移 */
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* 加上輕微陰影 */
-}
+/* 響應式：手機版改為垂直排列 */
+@media (max-width: 768px) {
+    .product-detail-container {
+        flex-direction: column;
+        padding: 20px;
+        margin: 20px;
+        gap: 30px;
+    }
 
+    .image-section {
+        order: 1; /* 手機版圖片在上 */
+    }
+
+    .product-info {
+        order: 2;
+        text-align: center;
+    }
+
+    #add-cart-btn {
+        max-width: 100%;
+    }
+}

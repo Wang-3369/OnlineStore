@@ -1,46 +1,122 @@
+/* 整體容器排版 */
 .promo-admin-container {
     display: flex;
+    flex-direction: row; /* 電腦版左右並排 */
     gap: 2rem;
     margin: 2rem 0;
+    align-items: flex-start;
 }
 
+/* 表單與列表盒模型 */
 .upload-box, .promo-list {
     flex: 1;
-    padding: 1rem;
-    border: 1px solid #ccc;
-    border-radius: 8px;
+    padding: 1.5rem;
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
+/* 表單間距優化 */
+.form-group {
+    margin-bottom: 1.2rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    color: #333;
+}
+
+.form-group input, .form-group select {
+    width: 100%;
+    padding: 0.6rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    box-sizing: border-box; /* 確保寬度包含 padding */
+}
+
+/* 列表顯示優化 */
 .promo-items {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* 自動適應寬度 */
+    gap: 1.5rem;
     margin-top: 1rem;
 }
 
+/* 個別促銷卡片設計 */
 .promo-item {
     position: relative;
+    border: 1px solid #eee;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #fafafa;
+    transition: transform 0.2s;
+}
+
+.promo-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
 .promo-item img {
-    width: 150px;
-    height: 150px;
+    width: 100%;
+    height: 180px;
     object-fit: cover;
-    border-radius: 4px;
 }
 
-.promo-item button.delete-btn {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    background: rgba(255,0,0,0.8);
+/* 活動資訊文字區 */
+.promo-info {
+    padding: 1rem;
+}
+
+.promo-info h4 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.promo-info p {
+    margin: 0.3rem 0;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+/* 範圍標籤 (Badge) */
+.badge {
+    background-color: #007bff;
     color: white;
-    border: none;
     padding: 0.2rem 0.5rem;
     border-radius: 4px;
-    cursor: pointer;
+    font-size: 0.75rem;
+    font-weight: normal;
 }
 
-.promo-item button.delete-btn:hover {
-    background: rgba(255,0,0,1);
+/* 刪除按鈕樣式 */
+.promo-item .delete-btn {
+    width: 100%;
+    background: #ff4d4f;
+    color: white;
+    border: none;
+    padding: 0.6rem;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.2s;
+}
+
+.promo-item .delete-btn:hover {
+    background: #d9363e;
+}
+
+/* 響應式：手機版改為上下堆疊 */
+@media (max-width: 768px) {
+    .promo-admin-container {
+        flex-direction: column;
+    }
+    .promo-items {
+        grid-template-columns: 1fr;
+    }
 }

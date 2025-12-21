@@ -116,24 +116,24 @@ function bindAddCartButtons() {
 }
 
 // 滾動時高亮分類
+// 修改滾動高亮的邏輯
 window.addEventListener("scroll", () => {
     const sidebarBtns = document.querySelectorAll("#category-list button");
-    const scrollCenter = window.innerHeight / 2 + window.scrollY;
-
-    sidebarBtns.forEach(btn => {
-        const cat = btn.innerText;
+    // 取得目前畫面上最接近頂部的分類
+    let currentCat = "";
+    categories.forEach(cat => {
         const section = document.getElementById(`category-${cat}`);
         if (section) {
             const rect = section.getBoundingClientRect();
-            const top = rect.top + window.scrollY;
-            const bottom = top + rect.height;
-
-            if (scrollCenter >= top && scrollCenter <= bottom) {
-                btn.classList.add("active");
-            } else {
-                btn.classList.remove("active");
+            // 如果區塊頂部距離視窗頂部小於 150px
+            if (rect.top < 150) {
+                currentCat = cat;
             }
         }
+    });
+
+    sidebarBtns.forEach(btn => {
+        btn.classList.toggle("active", btn.innerText === currentCat);
     });
 });
 

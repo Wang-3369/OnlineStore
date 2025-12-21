@@ -123,4 +123,38 @@ def delete_avatar():
         return jsonify({"message": "沒有自訂頭像可刪除"}), 400
 
 
+# 更新聯絡 Email
+@profile_bp.route("/api/profile/change_email", methods=["POST"])
+@login_required
+def change_email():
+    data = request.json
+    new_email = data.get("email")
 
+    # 基本驗證
+    if not new_email or "@" not in new_email:
+        return jsonify({"message": "請提供有效的 Email 地址"}), 400
+
+    # 更新資料庫
+    # 您在檔案開頭有定義 users_collection = db.users
+    result = users_collection.update_one(
+        {"username": session["username"]},
+        {"$set": {"email": new_email}}
+    )
+
+    if result.modified_count > 0 or result.matched_count > 0:
+        # 同步更新 session (如果其他地方有用到 session 中的 email)
+        session["email"] = new_email
+        return jsonify({"message": "Email 更新成功"})
+    else:
+        return jsonify({"message": "資料更新失敗"}), 400
+    
+@profile_bp.route("/api/profile/info", methods=["GET"])
+@login_required
+def get_profile_info():
+    user = users_collection.find_one({"username": session["username"]})
+    if user:
+        return jsonify({
+            "username": user.get("username"),
+            "email": user.get("email") # 回傳現有的 Email
+        })
+    return jsonify({"message": "找不到使用者"}), 404

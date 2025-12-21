@@ -1,23 +1,39 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>個人資料</h2>
+<div class="profile-section">
+    <h2>個人資料</h2>
+    <p>使用者名稱：<strong>{{ user.username }}</strong></p>
 
-<p>使用者名稱：{{ user.username }}</p>
+    <div style="text-align: center; margin-bottom: 20px;">
+        <img src="{% if session.get('avatar') %}/api/profile/avatar/{{ session['avatar'] }}{% else %}{{ session.get('google_avatar') or url_for('static', filename='images/user.png') }}{% endif %}" 
+             alt="avatar" style="width:120px; height:120px; border-radius:50%; object-fit: cover;" id="avatar-img">
+        <br><br>
+        <input type="file" id="avatar-input" style="font-size: 0.8em;">
+        <div style="margin-top: 10px;">
+            <button id="upload-avatar">上傳新頭像</button>
+            <button id="delete-avatar" class="btn-danger">刪除頭像</button>
+        </div>
+    </div>
 
-<!-- 頭像 -->
-<img src="{% if session.get('avatar') %}/api/profile/avatar/{{ session['avatar'] }}{% else %}{{ session.get('google_avatar') or url_for('static', filename='images/user.png') }}{% endif %}" 
-     alt="avatar" style="width:100px;border-radius:50%;" id="avatar-img">
+    <hr>
 
+    <div class="email-section">
+        <h3>聯絡資訊</h3>
+        <p>目前的 Email：<strong id="current-email">{{ user.email or '未設定' }}</strong></p>
+        <input type="email" id="new-email" placeholder="輸入新的 Gmail/Email">
+        <button id="change-email">更新 Email 資訊</button>
+    </div>
 
-<br>
-<input type="file" id="avatar-input">
-<button id="upload-avatar">上傳頭像</button>
-<button id="delete-avatar">刪除頭像</button>
+    <hr>
 
-<h3>修改密碼</h3>
-<input type="password" id="old-password" placeholder="舊密碼">
-<input type="password" id="new-password" placeholder="新密碼">
-<button id="change-password">修改密碼</button>
+    <div class="password-section">
+        <h3>帳號安全</h3>
+        <input type="password" id="old-password" placeholder="舊密碼">
+        <input type="password" id="new-password" placeholder="新密碼 (至少 6 碼)">
+        <button id="change-password">修改登入密碼</button>
+    </div>
+</div>
 
 <script defer src="{{ url_for('static', filename='js/profile.js') }}"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
 {% endblock %}

@@ -1,57 +1,65 @@
 {% extends "base.html" %}
 {% block content %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/stats.css') }}">
+
 <div class="stats-container">
+    <h2>📊 銷售數據分析</h2>
 
-    <h2>商品銷售統計</h2>
-
-    <!-- 新增：營業額 + 毛利 -->
-    <div class="summary-box">
-        <p><strong>總營業額：</strong> <span id="totalRevenue">0</span> 元</p>
+    <div class="dashboard-summary">
+        <div class="summary-card">
+            <span class="label">總營業額</span>
+            <div class="value">NT$ <span id="totalRevenue">0</span></div>
+        </div>
+        <div class="summary-card" style="background: linear-gradient(135deg, #34a853, #1b5e20);">
+            <span class="label">篩選範圍內訂單數</span>
+            <div class="value"><span id="filteredOrderCount">0</span> 筆</div>
+        </div>
     </div>
 
-    <!-- 開關：包含未完成訂單 -->
-    <label>
-        <input type="checkbox" id="includePending"> 包含未完成訂單
-    </label>
-    <br>
+    <div class="control-panel">
+        <div class="control-group">
+            <div class="control-item">
+                <label>日期範圍：</label>
+                <input type="date" id="startDate" class="form-input">
+                <span>~</span>
+                <input type="date" id="endDate" class="form-input">
+                <button id="filterDateBtn" class="btn-action">套用篩選</button>
+            </div>
+            <div class="control-item">
+                <input type="checkbox" id="includePending">
+                <label for="includePending">包含未完成訂單</label>
+            </div>
+        </div>
 
-    <!-- 清理訂單選擇 -->
-    <label for="clearType">選擇要刪除的訂單類型：</label>
-    <select id="clearType">
-        <option value="completed">完成訂單</option>
-        <option value="pending">未完成訂單</option>
-        <option value="missing">缺失 status 訂單</option>
-    </select>
-    <button id="clearOrdersBtn">清理訂單</button>
-    <p id="clearResult"></p>
+        <div class="control-group chart-switch">
+            <button id="barByProductBtn" class="btn-outline">依商品累計 (長條)</button>
+            <button id="barByDateBtn" class="btn-outline">依日期群組 (長條)</button>
+            <button onclick="showChart('line')" class="btn-outline">每日營收 (折線)</button>
+            <button onclick="showChart('pie')" class="btn-outline">銷售占比 (圓餅)</button>
+            <button onclick="exportCSV()" class="btn-outline" style="border-color: #555; color: #555;">📥 下載 CSV</button>
+        </div>
 
-    <!-- 日期篩選 -->
-    <label for="startDate">開始日期：</label>
-    <input type="date" id="startDate">
-    <label for="endDate">結束日期：</label>
-    <input type="date" id="endDate">
-    <button id="filterDateBtn">篩選</button><br>
-
-
-    <!-- 圖表切換按鈕 -->
-    <div class="chart-switch">
-        <button id="barByProductBtn">長條圖(依商品累計)</button>
-        <button id="barByDateBtn">長條圖(依日期群組)</button>
-        <button onclick="showChart('line')">折線圖</button>
-        <button onclick="showChart('pie')">圓餅圖</button>
-        <button onclick="exportCSV()">下載 CSV</button>
+        <div class="control-group" style="background: #fff5f5; padding: 10px; border-radius: 8px;">
+            <div class="control-item">
+                <label>資料清理：</label>
+                <select id="clearType">
+                    <option value="completed">完成訂單</option>
+                    <option value="pending">未完成訂單</option>
+                    <option value="missing">缺失狀態訂單</option>
+                </select>
+                <button id="clearOrdersBtn" class="btn-danger">清理訂單</button>
+                <span id="clearResult" style="margin-left: 10px; color: #dc3545;"></span>
+            </div>
+        </div>
     </div>
 
-
-    <!-- 圖表容器 -->
     <div class="chart-box">
         <canvas id="barChart"></canvas>
         <canvas id="lineChart" style="display:none;"></canvas>
         <canvas id="pieChart" style="display:none;"></canvas>
     </div>
-
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script defer src="{{ url_for('static', filename='js/stats.js') }}"></script>
 {% endblock %}

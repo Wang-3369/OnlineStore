@@ -101,3 +101,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         document.getElementById("review-modal").style.display = "none";
     });
 });
+
+// 每 30 秒自動重新載入頁面以更新訂單狀態
+setInterval(() => {
+    location.reload();
+}, 30000);
