@@ -1,14 +1,37 @@
 /* 彈窗背景 */
+/* 彈窗背景：改用 Flexbox 垂直置中 */
 .modal {
-    display: none; /* 預設隱藏 */
+    display: none; 
     position: fixed;
     z-index: 10000;
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0,0,0,0.5); /* 半透明黑 */
-    backdrop-filter: blur(5px); /* 背景模糊 */
+    background-color: rgba(0,0,0,0.5); 
+    backdrop-filter: blur(5px);
+    
+    /* 新增以下三行 */
+    display: none; /* JS 會切換為 flex */
+    justify-content: center;
+    align-items: center;
+}
+
+/* 彈窗內容主體：移除 margin，加入高度限制與捲軸 */
+.modal-content {
+    background-color: #fff;
+    padding: 15px 25px;
+    border-radius: 15px;
+    width: 95%; /* 手機版佔寬一點 */
+    max-width: 450px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+    position: relative;
+    animation: slideDown 0.3s ease-out;
+
+    /* 新增以下三行：防止視窗太長超出螢幕 */
+    max-height: 90vh; /* 最大高度為螢幕的 90% */
+    overflow-y: auto; /* 如果內容太多，內部會出現捲軸 */
+    margin: 0;        /* 移除原本的 5% auto */
 }
 
 /* Radio 按鈕排列 */
@@ -44,18 +67,6 @@ input[type="email"]:focus, input[type="time"]:focus, textarea:focus {
     box-shadow: 0 0 5px rgba(40, 167, 69, 0.3);
 }
 
-/* 彈窗內容主體 */
-.modal-content {
-    background-color: #fff;
-    margin: 5% auto;
-    padding: 15px 25px;
-    border-radius: 15px;
-    width: 90%;
-    max-width: 450px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
-    position: relative;
-    animation: slideDown 0.3s ease-out;
-}
 
 @keyframes slideDown {
     from { transform: translateY(-50px); opacity: 0; }
