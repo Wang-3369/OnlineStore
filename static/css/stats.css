@@ -1,77 +1,170 @@
-/* stats-container */
+/* 全域統計容器 */
 .stats-container {
-    padding: 30px;
-    max-width: 1100px;
+    padding: 40px;
+    max-width: 1200px;
     margin: 0 auto;
-    font-family: 'Inter', 'Segoe UI', sans-serif;
+    font-family: 'Inter', 'Segoe UI', Tahoma, sans-serif;
+    color: #2d3748;
 }
 
-/* 數據卡片區域 */
+/* 頁面大標題 */
+.stats-container h2 {
+    margin-bottom: 40px;
+    font-size: 2.5rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 800;
+    text-align: center;
+}
+
+/* 數據卡片區域 (Grid 佈局) */
 .dashboard-summary {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-    margin-bottom: 25px;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 25px;
+    margin-bottom: 35px;
 }
 
 .summary-card {
-    background: linear-gradient(135deg, #1a73e8, #0d47a1);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(26, 115, 232, 0.2);
+    padding: 25px;
+    border-radius: 16px;
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.25);
     display: flex;
     flex-direction: column;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.summary-card .label { font-size: 0.9rem; opacity: 0.9; }
-.summary-card .value { font-size: 2rem; font-weight: bold; margin-top: 5px; }
+.summary-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(102, 126, 234, 0.35);
+}
 
-/* 篩選面板 */
-.control-panel {
+.summary-card .label { 
+    font-size: 0.95rem; 
+    opacity: 0.85; 
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.summary-card .value { 
+    font-size: 2.2rem; 
+    font-weight: 800; 
+    margin-top: 8px; 
+}
+
+/* 篩選控制面板 */
+.control-panel, .filter-box {
     background: white;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    margin-bottom: 25px;
-}
-
-.control-group {
+    padding: 25px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    margin-bottom: 30px;
+    border: 2px solid rgba(102, 126, 234, 0.05);
     display: flex;
     flex-wrap: wrap;
-    gap: 15px;
+    gap: 20px;
     align-items: center;
-    margin-bottom: 15px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid #f0f0f0;
 }
 
-.control-group:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+.control-item, .filter-box label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    color: #4a5568;
+}
 
-.control-item { display: flex; align-items: center; gap: 8px; }
+/* 輸入框美化 */
+input[type="date"], select {
+    padding: 10px 15px;
+    border-radius: 10px;
+    border: 2px solid #e2e8f0;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    outline: none;
+}
 
-/* 圖表容器固定高度防止閃爍 */
+input[type="date"]:focus, select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+}
+
+/* 圖表容器 */
 .chart-box {
     background: white;
-    padding: 20px;
-    border-radius: 15px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-    height: 500px; /* 固定高度 */
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+    height: 500px;
     position: relative;
+    border: 1px solid #f0f0f0;
+    margin-top: 20px;
 }
 
-/* 按鈕美化 */
-.btn-action {
-    background: #1a73e8; color: white; border: none;
-    padding: 8px 16px; border-radius: 6px; cursor: pointer;
-    font-weight: 500; transition: 0.3s;
+/* 按鈕樣式組 */
+.chart-switch {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 30px;
+    justify-content: center;
 }
-.btn-action:hover { background: #1557b0; transform: translateY(-1px); }
 
-.btn-outline {
-    background: white; color: #1a73e8; border: 1px solid #1a73e8;
-    padding: 8px 16px; border-radius: 6px; cursor: pointer; transition: 0.3s;
+button {
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
 }
-.btn-outline:hover { background: #f1f7fe; }
 
-.btn-danger { background: #dc3545; color: white; border: none; padding: 8px 16px; border-radius: 6px; }
+/* 主要藍紫色按鈕 */
+.btn-primary, button:not(.btn-danger, .btn-outline, #clearOrdersBtn) {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    filter: brightness(1.1);
+}
+
+/* 危險/清理按鈕 (紅色) */
+#clearOrdersBtn, .btn-danger {
+    background: linear-gradient(135deg, #f56565 0%, #c53030 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(245, 101, 101, 0.3);
+}
+
+/* 下載/成功按鈕 (綠色) */
+.chart-switch button:last-child {
+    background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+    box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
+}
+
+/* 響應式優化 */
+@media (max-width: 768px) {
+    .stats-container { padding: 20px; }
+    .stats-container h2 { font-size: 1.8rem; }
+    .chart-box { height: 350px; padding: 15px; }
+    .control-panel { flex-direction: column; align-items: stretch; }
+    .chart-switch { flex-direction: column; }
+    .summary-card .value { font-size: 1.8rem; }
+}
+
+/* 載入中動畫 */
+.loading {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}

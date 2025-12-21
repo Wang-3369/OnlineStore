@@ -1,39 +1,47 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="profile-section">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+<div class="profile-container">
     <h2>個人資料</h2>
-    <p>使用者名稱：<strong>{{ user.username }}</strong></p>
 
-    <div style="text-align: center; margin-bottom: 20px;">
+    <div class="avatar-section">
         <img src="{% if session.get('avatar') %}/api/profile/avatar/{{ session['avatar'] }}{% else %}{{ session.get('google_avatar') or url_for('static', filename='images/user.png') }}{% endif %}" 
-             alt="avatar" style="width:120px; height:120px; border-radius:50%; object-fit: cover;" id="avatar-img">
-        <br><br>
-        <input type="file" id="avatar-input" style="font-size: 0.8em;">
-        <div style="margin-top: 10px;">
-            <button id="upload-avatar">上傳新頭像</button>
-            <button id="delete-avatar" class="btn-danger">刪除頭像</button>
+             alt="avatar" 
+             style="width:100px; height:100px; border-radius:50%; object-fit: cover; border: 3px solid #e2e8f0;" 
+             id="avatar-img">
+        
+        <div class="user-info">
+            <p style="font-size: 1.1em; font-weight: bold; margin-bottom: 5px;">{{ user.username }}</p>
+            <div class="btn-group">
+                <label for="avatar-input" class="btn" style="padding: 8px 16px; font-size: 0.9em;">更換頭像</label>
+                <input type="file" id="avatar-input" accept="image/*" style="display:none;">
+                <button id="delete-avatar" class="btn-danger" style="padding: 8px 16px; font-size: 0.9em;">刪除頭像</button>
+            </div>
         </div>
     </div>
 
-    <hr>
+    <h3 class="profile-section-title">安全性設定</h3>
+    
+    <label for="old-password" style="font-size: 0.9em; color: #718096; margin-bottom: 5px; display:block;">舊密碼</label>
+    <input type="password" id="old-password" class="profile-input" placeholder="請輸入舊密碼">
+    
+    <label for="new-password" style="font-size: 0.9em; color: #718096; margin-bottom: 5px; display:block;">新密碼</label>
+    <input type="password" id="new-password" class="profile-input" placeholder="請輸入新密碼">
+    
+    <button id="change-password" style="width: 100%; margin-top: 10px;">確認修改密碼</button>
+</div>
 
-    <div class="email-section">
-        <h3>聯絡資訊</h3>
-        <p>目前的 Email：<strong id="current-email">{{ user.email or '未設定' }}</strong></p>
-        <input type="email" id="new-email" placeholder="輸入新的 Gmail/Email">
-        <button id="change-email">更新 Email 資訊</button>
+<div id="crop-modal">
+    <div class="crop-container">
+        <img id="image-to-crop" src="" alt="Picture">
     </div>
-
-    <hr>
-
-    <div class="password-section">
-        <h3>帳號安全</h3>
-        <input type="password" id="old-password" placeholder="舊密碼">
-        <input type="password" id="new-password" placeholder="新密碼 (至少 6 碼)">
-        <button id="change-password">修改登入密碼</button>
+    <div class="crop-actions">
+        <button id="crop-upload-btn" class="btn-success">確認裁切並上傳</button>
+        <button id="crop-cancel-btn" class="btn-secondary">取消</button>
     </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 <script defer src="{{ url_for('static', filename='js/profile.js') }}"></script>
 <link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
 {% endblock %}

@@ -8,32 +8,44 @@ body {
 }
 
 /* ===== 促銷輪播區 ===== */
+/* 促銷輪播容器：確保它能根據內容伸縮 */
 .promo-slider-container {
-    width: 95%;
-    max-width: 1200px;
-    height: 400px;
-    margin: 20px auto;
-    position: relative;
+    width: 85% !important;        /* 寬度佔頁面的 85% */
+    max-width: 900px !important;  /* 限制最大寬度，避免在大螢幕拉得太長 */
+    height: 300px !important;     /* 固定高度 */
+    margin: 40px auto !important; /* 置中並增加上下留白 */
+    
+    /* 重置 main > * 可能帶來的多餘內距 */
+    padding: 0 !important;        
     overflow: hidden;
+    position: relative;
     border-radius: 20px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-    background: #fff;
+    
+    /* 為了讓留白好看，背景設為透明或與網頁一致，或保持白色 */
+    background: rgba(255, 255, 255, 0.9) !important; 
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15) !important;
 }
 
+/* 2. 滑軌部分 */
 .promo-slider {
     display: flex;
-    width: 100%;
+    transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
     height: 100%;
-    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* 3. 圖片：縮小以完整顯示 (Contain) */
 .promo-slider img {
-    width: 100%;
-    flex-basis: 100%;
+    width: 100%;                  /* 寬度配合容器 */
+    height: 100%;                 /* 高度配合容器 */
     flex-shrink: 0;
-    height: 100%;
-    object-fit: cover; /* 滿版展示 */
-    display: block;
+    
+    /* 核心邏輯：圖片縮小顯示，不被裁切 */
+    object-fit: contain;          
+    
+    /* 圖片內留白：讓圖片看起來縮小在框格內 */
+    padding: 20px;                
+    box-sizing: border-box;
+    background: transparent;
 }
 
 /* 輪播按鈕 */
@@ -216,7 +228,14 @@ body {
 
 /* ===== 響應式調整 ===== */
 @media (max-width: 900px) {
-    .promo-slider-container { height: 250px; }
+    .promo-slider-container {
+        width: 92% !important;
+        height: 200px !important; /* 手機版高度縮小 */
+        margin: 20px auto !important;
+    }
+    .promo-slider img {
+        padding: 10px;            /* 手機版內縮小一點 */
+    }
     
     .main-container {
         flex-direction: column;
