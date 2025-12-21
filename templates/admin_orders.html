@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 {% block content %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/admin_orders.css') }}">
 
 <div class="admin-orders-container">
     <h2>管理後台 - 接單系統</h2>
@@ -10,14 +9,12 @@
 </div>
 
 <script>
-const evtSource = new EventSource("/events");
+// --- 1. 資源初始化 ---
+const alertAudio = new Audio("/static/audio/alert.mp3");
+// 單一連線實例
+const eventSource = new EventSource("/events");
 
-evtSource.addEventListener("new_order", function(e) {
-    const data = JSON.parse(e.data);
-    alert(`🔔 新訂單來了！\n編號：${data.order_id}\n金額：$${data.total}`);
-    location.reload();
-});
-
+// --- 2. 訂單操作功能 ---
 async function fetchOrders() {
     const res = await fetch("/api/admin/orders");
     const orders = await res.json();
@@ -32,22 +29,15 @@ async function fetchOrders() {
     orders.forEach(order => {
         let statusClass = `status-${order.status}`;
         let actionButtons = "";
-
-        // 根據狀態顯示對應按鈕
         if (order.status === 'pending') {
-            actionButtons = `
-                <button class="btn-accept" onclick="updateStatus('${order.order_id}', 'accepted')">接受訂單</button>
-                <button class="btn-reject" onclick="updateStatus('${order.order_id}', 'rejected')">拒絕訂單</button>
-            `;
+            actionButtons = `<button class="btn-accept" onclick="updateStatus('${order.order_id}', 'accepted')">接受訂單</button>
+                             <button class="btn-reject" onclick="updateStatus('${order.order_id}', 'rejected')">拒絕訂單</button>`;
         } else if (order.status === 'accepted') {
-            actionButtons = `
-                <button class="btn-complete" onclick="updateStatus('${order.order_id}', 'completed')">通知餐點完成</button>
-            `;
+            actionButtons = `<button class="btn-complete" onclick="updateStatus('${order.order_id}', 'completed')">通知餐點完成</button>`;
         } else {
             actionButtons = `<span>已結束</span>`;
         }
 
-        // 組合商品列表 HTML
         let productsHtml = "<ul>";
         for (const pid in order.products) {
             let p = order.products[pid];
@@ -58,21 +48,11 @@ async function fetchOrders() {
         const div = document.createElement("div");
         div.className = `order-card ${statusClass}`;
         div.innerHTML = `
-            <div>
-                <h3>單號：${order.order_id}</h3>
-                <span>${order.created_at.split('T')[0]}</span>
-            </div>
+            <div><h3>單號：${order.order_id}</h3><span>${order.created_at.split('T')[0]}</span></div>
             <p><strong>顧客：</strong> ${order.username}</p>
-            <p><strong>取餐時間：</strong> ${order.pickup_time || '未指定'}</p>
-            <p><strong>備註：</strong> ${order.note || '（無備註）'}</p>
             <p><strong>狀態：</strong> ${getStatusText(order.status)}</p>
             <p><strong>總金額：</strong> NT$ ${order.total}</p>
-            <hr>
-            ${productsHtml}
-            <div>
-                ${actionButtons}
-            </div>
-        `;
+            <hr>${productsHtml}<div>${actionButtons}</div>`;
         container.appendChild(div);
     });
 }
@@ -88,26 +68,62 @@ function getStatusText(status) {
 }
 
 async function updateStatus(orderId, status) {
-    if(!confirm(`確定要將狀態改為 ${status} 嗎？`)) return;
-    
+    if(!confirm(`確定要變更狀態為 ${status} 嗎？`)) return;
     const res = await fetch("/api/admin/order/status", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ order_id: orderId, status: status })
     });
-    const result = await res.json();
-    if (res.ok) {
-        location.reload();
-    } else {
-        const result = await res.json();
-        alert("更新失敗：" + result.message);
-    }
+    if (res.ok) fetchOrders(); 
 }
 
-// 頁面載入後執行
+// --- 3. SSE 即時監聽 ---
+eventSource.addEventListener("new_order", function(e) {
+    const data = JSON.parse(e.data);
+    console.log("🔔 收到新訂單事件:", data);
+
+    // 播放音效
+    alertAudio.play().catch(err => console.warn("音效播放受阻"));
+
+    // 桌面通知
+    if (Notification.permission === "granted") {
+        const notification = new Notification("🔔 店長，新訂單來了！", {
+            body: `單號：#${data.order_id}\n金額：NT$ ${data.total}`,
+            icon: "/static/images/Favicon.png", 
+            tag: "new-order",      // 加上 tag 讓系統識別
+            renotify: true,        // 即使有舊通知也要再次提醒
+            requireInteraction: true 
+        });
+
+        // 點擊後跳轉回視窗
+        notification.onclick = function() {
+            window.focus();
+            this.close();
+        };
+    }
+
+    // 刷新列表
+    fetchOrders();
+});
+
+// 監聽連線錯誤
+eventSource.onerror = function() {
+    console.error("SSE 連線中斷，正在嘗試重新連線...");
+};
+
+// --- 4. 初始化 ---
 document.addEventListener("DOMContentLoaded", () => {
     fetchOrders();
-    setInterval(fetchOrders, 10000); // 每10秒自動更新
+    
+    // 請求通知權限
+    if (Notification.permission !== "granted") {
+        Notification.requestPermission();
+    }
+
+    // 老闆點擊頁面後啟用音效預熱
+    document.addEventListener('click', () => {
+        alertAudio.load();
+    }, { once: true });
 });
 </script>
 {% endblock %}

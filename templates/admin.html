@@ -34,6 +34,66 @@
         <button type="button" id="addCategoryBtn">新增分類</button>
     </div>
 </div>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const currentUser = document.body.dataset.username;
+    const userRole = "{{ session.get('role') }}"; // 從 Session 取得角色
+    if (!currentUser) return;
 
+    const globalEvtSource = new EventSource("/events");
+
+    // --- 1. 使用者邏輯：我的訂單狀態變了 ---
+    globalEvtSource.addEventListener("order_update", function(e) {
+        const data = JSON.parse(e.data);
+        // 無論我是不是管理員，只要這張單是「我的」，就跳通知
+        if (data.username === currentUser) {
+            showNotificationDot();
+            
+            if (window.location.pathname === "/orders") {
+                alert(`您的訂單 ${data.order_id} 狀態已更新為：${data.status}`);
+                location.reload();
+            } else {
+                alert(`[個人訂單] 您的訂單狀態已更新！`);
+            }
+        }
+    });
+
+    // --- 2. 管理者邏輯：有別的客人下單了 ---
+    globalEvtSource.addEventListener("new_order", function(e) {
+        // 只有身分是 admin 或 sub-admin 才處理新訂單通知
+        if (userRole === "admin" || userRole === "sub-admin") {
+            const data = JSON.parse(e.data);
+            
+            // 排除掉「管理者自己下的單」，避免重複跳通知（如果你想的話）
+            if (data.username !== currentUser) {
+                showNotificationDot();
+                
+                // 播放音效 (確保 base.html 有定義 alertAudio)
+                if (typeof alertAudio !== "undefined") {
+                    alertAudio.play().catch(() => console.log("等待互動後播放"));
+                }
+
+                // 如果在接單頁面，就刷新列表
+                if (typeof fetchOrders === "function") {
+                    fetchOrders();
+                } else {
+                    alert(`[系統通知] 有新訂單進來了！單號：${data.order_id}`);
+                }
+            }
+        }
+    });
+
+    // 輔助函式：顯示紅點
+    function showNotificationDot() {
+        const container = document.getElementById("user-container");
+        if (container) container.classList.add("notification-dot");
+    }
+
+    // 點擊消除紅點
+    document.getElementById("user-icon")?.addEventListener("click", () => {
+        document.getElementById("user-container").classList.remove("notification-dot");
+    });
+});
+</script>
 <script defer src="{{ url_for('static', filename='js/admin.js') }}"></script>
 {% endblock %}
