@@ -13,9 +13,14 @@
         </div>
         <div class="form-group">
             <label>密碼</label>
-            <input type="password" name="password" placeholder="請設定您的密碼" required>
+            <input type="password" name="password" id="register-password" placeholder="至少 8 位，含大小寫字母、數字及符號" required>
+            <div id="password-strength-feedback" style="font-size: 0.8rem; margin-top: 5px;"></div>
         </div>
-        <button type="submit">註冊帳號</button>
+        <div class="form-group">
+            <label>確認密碼</label>
+            <input type="password" name="confirm_password" id="confirm-password" placeholder="請再次輸入密碼" required>
+        </div>
+        <button type="submit" id="register-submit-btn">註冊帳號</button>
     </form>
 
     <div class="auth-footer">
