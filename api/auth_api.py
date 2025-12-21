@@ -11,21 +11,44 @@ load_dotenv()
 auth_bp = Blueprint("auth", __name__)
 
 # === 帳號密碼登入功能 ===
+import re  # 匯入正則表達式模組
+from datetime import datetime, timedelta, timezone
+
+# 定義台灣時區（如果你之前已經定義過，可以共用）
+tw_tz = timezone(timedelta(hours=8))
+
 @auth_bp.route("/api/register", methods=["POST"])
 def register():
     data = request.json
     username = data.get("username")
     password = data.get("password")
 
+    # 1. 基本欄位檢查
+    if not username or not password:
+        return jsonify({"message": "帳號與密碼為必填"}), 400
+
+    # 2. 密碼複雜度檢測 (後端防線)
+    # 規則：至少 8 位，包含大小寫、數字、特殊符號
+    pwd_pattern = r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
+    if not re.match(pwd_pattern, password):
+        return jsonify({
+            "message": "密碼強度不足：需至少 8 個字元，且包含大小寫英文字母、數字及特殊符號 (@$!%*?&)"
+        }), 400
+
+    # 3. 檢查帳號是否重複
     if users_collection.find_one({"username": username}):
         return jsonify({"message": "帳號已存在"}), 400
 
+    # 4. 雜湊密碼並存入資料庫
     hashed_password = generate_password_hash(password)
     users_collection.insert_one({
         "username": username,
         "password": hashed_password,
         "role": "user",
-        "created_at": datetime.utcnow()
+        "avatar": None,
+        "google_avatar": None,
+        # 建議改用台灣時間存入，或一致使用 datetime.now(timezone.utc)
+        "created_at": datetime.now(tw_tz) 
     })
     return jsonify({"message": "註冊成功"})
 
@@ -95,7 +118,7 @@ def google_callback():
             "name": name,
             "avatar": None,
             "google_avatar": google_avatar,
-            "created_at": datetime.utcnow()
+            "created_at": datetime.now(tw_tz)
         }).inserted_id
         user = users_collection.find_one({"_id": user_id})
     else:
