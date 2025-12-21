@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="icon" href="{{ url_for('static', filename='images/Favicon.png') }}" type="image/x-icon">
 </head>
-<body data-username="{{ session.get('username', '') }}">
+<body data-username="{{ session.get('username', '') }}" data-role="{{ session.get('role', '') }}">
     <header>
         <h1>北寧路早餐店</h1>
         
