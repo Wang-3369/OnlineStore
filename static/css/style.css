@@ -5,6 +5,25 @@
     box-sizing: border-box;
 }
 
+/* 修改的主要內容區域 */
+main {
+    max-width: 1400px;
+    margin: 0 auto; /* 改為 0 auto 確保水平絕對置中 */
+    padding: 20px;  /* 使用 padding 代替外邊距，防止內容被擠壓 */
+    min-height: calc(100vh - 80px); /* 扣除 Header 高度 */
+}
+
+main > * {
+    background: rgba(255, 255, 255, 0.98);
+    border-radius: 20px;
+    padding: 2.5em;
+    box-shadow: 0 10px 50px rgba(0, 0, 0, 0.12);
+    margin-bottom: 30px; /* 改為只有下方間距 */
+    width: 100%; /* 強制填滿容器 */
+    box-sizing: border-box;
+    animation: pageEnter 0.6s ease-out;
+}
+
 body {
     font-family: "Noto Sans TC", "Microsoft JhengHei", -apple-system, BlinkMacSystemFont, sans-serif;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
