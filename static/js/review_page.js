@@ -29,19 +29,36 @@ document.addEventListener("DOMContentLoaded", async () => {
         else if (sortVal === "rating-desc") sortedReviews.sort((a,b)=> b.rating - a.rating);
         else if (sortVal === "rating-asc") sortedReviews.sort((a,b)=> a.rating - b.rating);
 
-        reviewBox.innerHTML = sortedReviews.map(r => `
-            <div class="review-item" data-id="${r._id}">
-                <div class="review-header">
-                    <strong>${r.username}</strong>
-                    <span class="review-rating">${"★".repeat(r.rating)}${"☆".repeat(5 - r.rating)}</span>
+        reviewBox.innerHTML = sortedReviews.map(r => {
+            // --- 核心修正：在這裡處理每一條評論的時間 ---
+            const date = new Date(r.created_at);
+            const displayTime = date.toLocaleString('zh-TW', { 
+                hour12: false, // 強制 24 小時制
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+
+            return `
+                <div class="review-item" data-id="${r._id}">
+                    <div class="review-header">
+                        <strong>${r.username}</strong>
+                        <span class="review-rating">${"★".repeat(r.rating)}${"☆".repeat(5 - r.rating)}</span>
+                    </div>
+                    <p>${r.content || "（無內容）"}</p>
+                    ${r.reply ? `<p class="review-reply"><strong>管理者回覆：</strong>${r.reply}</p>` : ""}
+                    <small>${displayTime}</small>  <div class="review-actions">
+                        ${r.can_delete ? `
+                            <button class="delete-btn">刪除</button>
+                            <button class="reply-btn">回覆</button>
+                        ` : ""}
+                    </div>
                 </div>
-                <p>${r.content}</p>
-                ${r.reply ? `<p class="review-reply"><strong>管理者回覆：</strong>${r.reply}</p>` : ""}
-                <small>${new Date(r.created_at).toLocaleString()}</small>
-                ${r.can_delete ? `<button class="delete-btn">刪除</button>
-                <button class="reply-btn">回覆</button>` : ""}
-            </div>
-        `).join("");
+            `;
+        }).join("");
 
         // 刪除
         document.querySelectorAll(".delete-btn").forEach(btn => {

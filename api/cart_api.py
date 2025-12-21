@@ -174,7 +174,9 @@ def checkout():
             "pickup_time": pickup_time,
             "note": note,
             "status": "pending",
-            "created_at": datetime.now(timezone.utc)
+            
+            # 核心修正：將 timezone.utc 改為你定義好的 tw_tz
+            "created_at": datetime.now(tw_tz).replace(tzinfo=None)
         }
         orders_collection.insert_one(order_data)
 
