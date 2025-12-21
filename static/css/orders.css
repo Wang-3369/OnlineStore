@@ -131,6 +131,7 @@
     font-size: 35px;
     cursor: pointer;
     user-select: none;
+    flex-direction: row-reverse;
 }
 
 #star-rating span {
@@ -139,10 +140,16 @@
     display: inline-block;
 }
 
+/* 確保點擊後的狀態能正確擴散到左邊所有星星 */
 #star-rating span.selected,
+#star-rating span.selected ~ span {
+    color: #ecc94b !important;
+}
+
+/* 讓 hover 時的權限高於 selected，增加互動感 */
 #star-rating span:hover,
 #star-rating span:hover ~ span {
-    color: #ecc94b; /* 金黃色 */
+    color: #ecc94b !important;
 }
 
 /* 管理者回覆區塊 */

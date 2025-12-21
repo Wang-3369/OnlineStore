@@ -54,15 +54,20 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
     });
 
-    // 4. 星星評分邏輯
+    // 4. 星星評分邏輯 (修正版)
     document.querySelectorAll("#star-rating span").forEach(star => {
         star.addEventListener("click", () => {
+            // 取得點擊的星等 (5, 4, 3, 2, 1)
             selectedRating = parseInt(star.dataset.star);
-            const stars = document.querySelectorAll("#star-rating span");
-            stars.forEach(s => s.classList.remove("selected"));
-            for (let i = 0; i < selectedRating; i++) {
-                stars[i].classList.add("selected");
-            }
+            
+            // 移除所有星星的選取狀態
+            document.querySelectorAll("#star-rating span").forEach(s => s.classList.remove("selected"));
+            
+            // 只幫「被點擊的那一顆」加上 selected
+            // 配合 CSS 的 .selected ~ span，左邊（代碼後方）的星星會自動變色
+            star.classList.add("selected");
+            
+            console.log("已選取星等：", selectedRating);
         });
     });
 
@@ -109,21 +114,32 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 });
 
-// --- SSE 即時訂單狀態更新 ---
+/* --- SSE 即時訂單狀態更新 ---
+// orders.js 結尾修正版
 const evtSource = new EventSource("/events");
 
 evtSource.addEventListener("order_update", function(e) {
+    console.log("--- 收到 SSE 更新通知 ---");
     const data = JSON.parse(e.data);
     
-    // 從 HTML 的隱藏欄位或 body data 屬性取得目前使用者名稱
-    // 建議在 HTML 中加上 <body data-username="{{ session.get('username') }}">
+    // 取得目前的使用者名稱 (已確認為 '01257032')
     const currentUser = document.body.dataset.username;
 
-    if (data.username === currentUser) {
-        // 跳出通知
-        alert(`您的訂單 ${data.order_id} 狀態已更新為：${data.status}`);
-        
-        // 為了確保畫面上所有資料（包含庫存、評論按鈕等）正確，採取重整策略
-        location.reload(); 
+    // 加上 .trim() 確保不會因為空格導致判斷失敗
+    const isTargetUser = (data.username && data.username.trim() === currentUser.trim());
+
+    console.log("收到的資料:", data);
+    console.log("當前使用者:", currentUser);
+    console.log("是否匹配:", isTargetUser);
+
+    if (isTargetUser) {
+        // 使用 setTimeout 確保 alert 有時間在頁面重整前被捕捉
+        setTimeout(() => {
+            alert(`您的訂單 ${data.order_id} 狀態已更新為：${data.status}`);
+            console.log("Alert 已觸發，準備重整頁面...");
+            location.reload(); 
+        }, 200); // 延遲 200 毫秒
+    } else {
+        console.warn("收到的通知不屬於此使用者，忽略更新。");
     }
-});
+});*/
