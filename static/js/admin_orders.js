@@ -61,15 +61,32 @@ function getActionButtons(order) {
     return `<span>已結束</span>`;
 }
 
+// --- 修正後的 updateStatus 函式 ---
 async function updateStatus(orderId, status) {
+    const btn = event.target; 
+    const originalText = btn.innerText;
+    
     if (!confirm(`確定要變更狀態為 ${status} 嗎？`)) return;
-    const res = await fetch("/api/admin/order/status", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ order_id: orderId, status: status })
-    });
-    if (res.ok) fetchOrders();
+
+    btn.disabled = true;
+    btn.innerText = "處理中...";
+
+    try {
+        const res = await fetch("/api/admin/order/status", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ order_id: orderId, status: status })
+        });
+
+        // 💡 這裡其實不需要手動呼叫 fetchOrders()，
+        // 因為下面的 Pusher 監聽會幫你執行全自動刷新。
+    } catch (error) {
+        console.error("更新出錯:", error);
+        alert("網路連線異常");
+    } finally {
+        btn.disabled = false;
+        btn.innerText = originalText;
+    }
 }
 
-// --- 2. 初始化執行 ---
 document.addEventListener("DOMContentLoaded", fetchOrders);

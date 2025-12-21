@@ -4,19 +4,12 @@ const PUSHER_KEY = '49507dd1bd4ba1a21d4d';
 const PUSHER_CLUSTER = 'ap3';
 
 /**
- * 核心功能：顯示自定義通知彈窗
- * @param {string} title - 標題
- * @param {string} message - 內容
- * @param {string} url - 點擊跳轉網址
- * @param {string} type - 'admin'(橘色) 或 'user'(綠色)
+ * 顯示自定義通知彈窗
  */
 function showNotificationPopup(title, message, url, type = 'admin') {
-    // 1. 播放音效
     alertAudio.play().catch(() => console.log("等待互動以播放音效"));
 
-    // 2. 建立 DOM
     const toast = document.createElement("div");
-    // 根據 type 加入不同的 class (admin 或 user-update)
     toast.className = `custom-notification ${type === 'user' ? 'user-update' : 'admin-update'}`;
     
     toast.innerHTML = `
@@ -25,15 +18,9 @@ function showNotificationPopup(title, message, url, type = 'admin') {
         <div class="notification-hint">點擊立刻前往處理 ➔</div>
     `;
 
-    // 3. 點擊事件：跳轉到對應頁面
-    toast.onclick = () => {
-        window.location.href = url;
-    };
-
-    // 4. 加入頁面
+    toast.onclick = () => { window.location.href = url; };
     document.body.appendChild(toast);
 
-    // 5. 6秒後自動消失
     setTimeout(() => {
         toast.style.opacity = "0";
         toast.style.transform = "translateX(120%)";
@@ -55,36 +42,31 @@ function setupPusher() {
         forceTLS: true
     });
 
-    // --- A. 管理員邏輯 (監聽新訂單) ---
+    // --- A. 管理員邏輯 (admin-channel) ---
     if (userRole === "admin" || userRole === "sub-admin") {
         const adminChannel = pusher.subscribe('admin-channel');
         
+        // 監聽 1：新訂單 (跳彈窗 + 刷新列表)
         adminChannel.bind('new-order', function(data) {
-            // 排除自己下的測試單 (避免自己下單自己跳管理通知)
             if (data.username !== currentUser) {
                 showNotificationDot("/admin/orders");
-                
-                // 橘色邊框彈窗 (管理員用)
-                showNotificationPopup(
-                    "🚨 新訂單通知", 
-                    `來自 <b>${data.username}</b> 的新訂單<br>單號：#${data.order_id}<br>金額：$${data.total}`,
-                    "/admin/orders",
-                    'admin' 
-                );
-
-                // 如果正在管理接單頁，自動刷新
+                showNotificationPopup("🚨 新訂單通知", `來自 ${data.username} 的新訂單`, "/admin/orders", 'admin');
                 if (typeof fetchOrders === "function") fetchOrders();
             }
         });
+
+        // 監聽 2：狀態變更 (解決管理頁面同步問題)
+        adminChannel.bind('order-status-updated', function(data) {
+            console.log("偵測到狀態變更，自動刷新列表...");
+            if (typeof fetchOrders === "function") fetchOrders(); 
+        });
     }
 
-    // --- B. 使用者邏輯 (監聽自己的訂單狀態更新) ---
+    // --- B. 使用者邏輯 (監聽自己的訂單頻道) ---
     const userChannel = pusher.subscribe(`user-${currentUser}`);
     
     userChannel.bind('order-update', function(data) {
         showNotificationDot("orders-btn");
-
-        // 綠色邊框彈窗 (一般使用者用)
         showNotificationPopup(
             "🍳 餐點進度更新", 
             `訂單 <b>#${data.order_id}</b><br>最新狀態：<span style="color:#2e7d32; font-weight:bold;">${data.status}</span>`,
@@ -92,7 +74,6 @@ function setupPusher() {
             'user'
         );
 
-        // 如果正在訂單記錄頁，2秒後刷新
         if (window.location.pathname === "/orders") {
             setTimeout(() => location.reload(), 2000);
         }
@@ -100,7 +81,7 @@ function setupPusher() {
 }
 
 /**
- * 紅點提醒 (保持不變)
+ * 紅點提醒
  */
 function showNotificationDot(targetId) {
     document.getElementById("user-container")?.classList.add("notification-dot");
@@ -108,11 +89,14 @@ function showNotificationDot(targetId) {
     btn?.classList.add("notification-dot");
 }
 
+// --- DOM 載入後啟動 ---
 document.addEventListener("DOMContentLoaded", () => {
     setupPusher();
+
     document.getElementById("user-icon")?.addEventListener("click", () => {
         document.getElementById("user-container")?.classList.remove("notification-dot");
     });
+
     document.addEventListener("click", (e) => {
         const target = e.target.closest(".notification-dot");
         if (target) target.classList.remove("notification-dot");

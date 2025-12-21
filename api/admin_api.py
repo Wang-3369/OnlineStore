@@ -128,22 +128,39 @@ def update_order_status():
         {"order_id": order_id},
         {"$set": {"status": new_status}}
     )
-
+    # admin_bp.py 裡面的 update_order_status 函式
+    if result.modified_count > 0:
+        # ... 原有的通知使用者代碼 ...
+        
+        # 新增：通知所有管理員界面刷新
+        pusher_client.trigger('admin-channel', 'order-status-updated', {
+            "order_id": order_id,
+            "status": new_status
+    })
     # 3. 如果成功更新，觸發 Pusher 即時通知與 Email
+    # --- 整理後的更新邏輯 ---
     if result.modified_count > 0:
         target_username = order.get("username")
         
-        # --- A. Pusher 即時通知 (使用者會聽到聲音、看到紅點) ---
+        # --- A. 通知「管理者」介面自動刷新 (所有管理員分頁同步) ---
+        try:
+            pusher_client.trigger('admin-channel', 'order-status-updated', {
+                "order_id": order_id,
+                "status": new_status
+            })
+        except Exception as e:
+            print(f"Pusher Admin 通知失敗: {e}")
+
+        # --- B. 通知「該顧客」餐點進度 ---
         try:
             pusher_client.trigger(f'user-{target_username}', 'order-update', {
                 "order_id": order_id,
                 "status": chinese_status
             })
-            print(f"Pusher 已發送狀態更新至: user-{target_username}")
         except Exception as pe:
-            print(f"Pusher 發送失敗: {pe}")
+            print(f"Pusher User 通知失敗: {pe}")
 
-        # --- B. Email 通知 ---
+        # --- C. Email 通知 ---
         if new_status == "accepted":
             send_status_email(mail, order, "訂單已接受", "您的訂單正在製作中！")
         elif new_status == "completed":
