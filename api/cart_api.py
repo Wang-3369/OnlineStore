@@ -3,7 +3,6 @@ from database.db import products_collection, orders_collection, promotions_colle
 from bson.objectid import ObjectId
 from datetime import datetime, timedelta, timezone
 import uuid
-from utils.sse import announcer, format_sse
 import json
 
 cart_bp = Blueprint("cart", __name__)
@@ -14,7 +13,6 @@ tw_tz = timezone(timedelta(hours=8))
 # --- 加入購物車 ---
 @cart_bp.route("/api/cart/add", methods=["POST"])
 def add_to_cart():
-    # 點餐時間檢查 (06:00 - 24:00)
     current_hour = datetime.now(tw_tz).hour
     if not (6 <= current_hour < 24):
         return jsonify({"message": "目前非點餐時間 (06:00-24:00)"}), 400
@@ -31,7 +29,6 @@ def add_to_cart():
         if not item:
             return jsonify({"message": "商品不存在"}), 404
 
-        # 庫存檢查
         cart = session.get("cart", {})
         current_qty_in_cart = cart.get(item_id, {}).get("quantity", 0)
         
@@ -43,7 +40,6 @@ def add_to_cart():
     except Exception:
         return jsonify({"message": "無效的商品 ID"}), 400
 
-    # 更新 Session 購物車
     if item_id in cart:
         cart[item_id]["quantity"] += quantity
     else:
@@ -55,15 +51,9 @@ def add_to_cart():
         }
     
     session["cart"] = cart
-    
-    warning_msg = f"注意：{item['name']} 即將售完" if item["stock"] < 5 else None
-    response_data = {"message": f"{item['name']} 已加入購物車", "cart": cart}
-    if warning_msg:
-        response_data["warning"] = warning_msg
-        
-    return jsonify(response_data)
+    return jsonify({"message": f"{item['name']} 已加入購物車", "cart": cart})
 
-# --- 取得購物車內容 ---
+# --- 取得購物車 ---
 @cart_bp.route("/api/cart", methods=["GET"])
 def get_cart():
     cart = session.get("cart", {})
@@ -73,7 +63,7 @@ def get_cart():
             cart[p_id]["category"] = product.get("category", "")
     return jsonify({"cart": cart})
 
-# --- 更新數量與刪除 ---
+# --- 更新與刪除 ---
 @cart_bp.route("/api/cart/update", methods=["POST"])
 def update_cart():
     data = request.json
@@ -94,9 +84,12 @@ def remove_cart_item():
         session["cart"] = cart
     return jsonify({"cart": cart})
 
-# --- 結帳 (核心邏輯) ---
+# --- 結帳 (Pusher 整合版) ---
 @cart_bp.route("/api/cart/checkout", methods=["POST"])
 def checkout():
+    # 在函式內導入以防止循環導入
+    from app import pusher_client
+
     cart = session.get("cart", {})
     username = session.get("username")
 
@@ -104,7 +97,9 @@ def checkout():
     if not username: return jsonify({"message": "尚未登入"}), 403
     
     data = request.json
-    gmail, pickup_time, note = data.get("gmail"), data.get("pickup_time"), data.get("note", "")
+    gmail = data.get("gmail")
+    pickup_time = data.get("pickup_time")
+    note = data.get("note", "")
 
     full_cart_items = []
     grand_subtotal = 0
@@ -118,10 +113,9 @@ def checkout():
     deducted_log = []
 
     try:
-        # 1. 庫存預扣與資訊抓取
+        # 1. 庫存處理
         for pid, item in cart.items():
             qty = int(item["quantity"])
-            # 原子操作：檢查庫存並扣除，防止超賣
             res = products_collection.update_one(
                 {"_id": ObjectId(pid), "stock": {"$gte": qty}},
                 {"$inc": {"stock": -qty}}
@@ -130,7 +124,6 @@ def checkout():
                 raise Exception(f"商品「{item['name']}」庫存不足")
             
             deducted_log.append((pid, qty))
-            
             product = products_collection.find_one({"_id": ObjectId(pid)})
             item_total = float(item["price"]) * qty
             full_cart_items.append({
@@ -142,28 +135,24 @@ def checkout():
             })
             grand_subtotal += item_total
 
-        # 2. 促銷計算邏輯
+        # 2. 促銷計算
         all_promos = list(promotions_collection.find())
         best_final_total = grand_subtotal
         applied_promo = None
-
         for promo in all_promos:
             threshold = float(promo.get("threshold", 0))
             scope_type = promo.get("scope_type", "all")
             scope_val = str(promo.get("scope_value", "")).strip()
             eligible_amount = 0
-
             for item in full_cart_items:
                 if scope_type == "all" or \
                    (scope_type == "category" and item["category"] == scope_val) or \
                    (scope_type == "product" and item["product_id"] == scope_val):
                     eligible_amount += item["subtotal"]
-
             if eligible_amount >= threshold and eligible_amount > 0:
                 p_type, p_val = promo.get("promo_type"), float(promo.get("promo_value", 0))
                 discount_amt = eligible_amount * (1 - p_val) if p_type == "discount" else p_val
                 current_total = grand_subtotal - discount_amt
-                
                 if current_total < best_final_total:
                     best_final_total = max(0, current_total)
                     applied_promo = {"title": promo.get("title"), "discount_value": round(discount_amt, 2)}
@@ -189,13 +178,16 @@ def checkout():
         }
         orders_collection.insert_one(order_data)
 
-        # 4. SSE 即時通知管理員
-        msg_payload = json.dumps({
-            "order_id": order_id,
-            "total": final_total,
-            "time": datetime.now(tw_tz).strftime("%H:%M")
-        })
-        announcer.announce(format_sse(data=msg_payload, event="new_order"))
+        # 4. 改用 Pusher 即時通知管理員
+        try:
+            pusher_client.trigger('admin-channel', 'new-order', {
+                "order_id": order_id,
+                "username": username,
+                "total": final_total,
+                "time": datetime.now(tw_tz).strftime("%H:%M")
+            })
+        except Exception as pusher_err:
+            print(f"Pusher 通知發送失敗: {pusher_err}")
 
         session.pop("cart")
         return jsonify({
@@ -206,7 +198,6 @@ def checkout():
         })
 
     except Exception as e:
-        # 回滾庫存
         for pid, q in deducted_log:
             products_collection.update_one({"_id": ObjectId(pid)}, {"$inc": {"stock": q}})
         return jsonify({"message": f"結帳失敗：{str(e)}"}), 400

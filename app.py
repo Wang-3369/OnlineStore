@@ -1,6 +1,5 @@
 import os
 from flask import Flask, render_template, session, redirect, Response
-from utils.sse import announcer
 # 導入各模組的 Blueprint
 from flask_mail import Mail, Message
 from api.product_api import product_bp
@@ -31,6 +30,16 @@ app.config['MAIL_PASSWORD'] = 'dczihbxveykeclnt' # 不是一般的密碼
 app.config['MAIL_DEFAULT_SENDER'] = ('OnlineStoreOcean', 'onlinestore.01257@gmail.com')
 
 mail = Mail(app)
+
+from pusher import Pusher
+
+pusher_client = Pusher(
+  app_id = "2093654",
+  key = "49507dd1bd4ba1a21d4d",
+  secret = "b953ff02012cba80e144",
+  cluster = "ap3",
+  ssl=True
+)
 
 # 註冊各個 API blueprint
 app.register_blueprint(auth_bp)
@@ -187,25 +196,6 @@ def favorites_page():
         return redirect("/login")
     return render_template("favorites.html")
 
-# SSE 監聽路由
-import queue
-
-@app.route('/events')
-def sse_stream():
-    def stream():
-        messages = announcer.listen()
-        while True:
-            try:
-                # 使用 timeout，每 20 秒強迫醒來一次發送心跳，避免 Thread 永久鎖死
-                msg = messages.get(timeout=20) 
-                yield msg
-            except queue.Empty:
-                # 發送一個空的心跳包，維持連線並釋放 Thread 控制權
-                yield "data: heartbeat\n\n"
-            except Exception:
-                break # 發生其他錯誤（如斷線）就跳出
-                
-    return Response(stream(), mimetype='text/event-stream')
 
 # 啟動 Flask
 if __name__ == '__main__':

@@ -1,106 +1,120 @@
-// --- 全域資源初始化 ---
+// --- 資源初始化 ---
 const alertAudio = new Audio("/static/audio/alert.mp3");
+const PUSHER_KEY = '49507dd1bd4ba1a21d4d';
+const PUSHER_CLUSTER = 'ap3';
 
 /**
- * 封裝 SSE 連線邏輯，避免斷線時全網頁 reload 導致伺服器癱瘓
+ * 核心功能：顯示自定義通知彈窗
+ * @param {string} title - 標題
+ * @param {string} message - 內容
+ * @param {string} url - 點擊跳轉網址
+ * @param {string} type - 'admin'(橘色) 或 'user'(綠色)
  */
-function setupSSE() {
+function showNotificationPopup(title, message, url, type = 'admin') {
+    // 1. 播放音效
+    alertAudio.play().catch(() => console.log("等待互動以播放音效"));
+
+    // 2. 建立 DOM
+    const toast = document.createElement("div");
+    // 根據 type 加入不同的 class (admin 或 user-update)
+    toast.className = `custom-notification ${type === 'user' ? 'user-update' : 'admin-update'}`;
+    
+    toast.innerHTML = `
+        <div class="notification-title">${title}</div>
+        <div class="notification-body">${message}</div>
+        <div class="notification-hint">點擊立刻前往處理 ➔</div>
+    `;
+
+    // 3. 點擊事件：跳轉到對應頁面
+    toast.onclick = () => {
+        window.location.href = url;
+    };
+
+    // 4. 加入頁面
+    document.body.appendChild(toast);
+
+    // 5. 6秒後自動消失
+    setTimeout(() => {
+        toast.style.opacity = "0";
+        toast.style.transform = "translateX(120%)";
+        setTimeout(() => toast.remove(), 500);
+    }, 6000);
+}
+
+/**
+ * 初始化 Pusher 監聽
+ */
+function setupPusher() {
     const currentUser = document.body.dataset.username;
     const userRole = document.body.dataset.role;
 
     if (!currentUser) return;
 
-    console.log("正在建立 SSE 連線...");
-    const globalSource = new EventSource("/events");
-
-    // 1. 處理心跳與一般訊息
-    globalSource.onmessage = function(e) {
-        if (e.data === "heartbeat") {
-            console.log("SSE 心跳正常");
-            return;
-        }
-    };
-
-    // 2. 監聽：訂單狀態更新 (個人通知)
-    globalSource.addEventListener("order_update", function(e) {
-        try {
-            const data = JSON.parse(e.data);
-            if (data.username && data.username.trim() === currentUser.trim()) {
-                showNotificationDot("orders-btn");
-
-                if (window.location.pathname === "/orders") {
-                    alert(`您的訂單 ${data.order_id} 狀態已更新為：${data.status}`);
-                    location.reload();
-                } else {
-                    alert(`[個人訂單通知] 您的訂單狀態已更新！`);
-                }
-            }
-        } catch (err) {
-            console.error("解析 order_update 失敗", err);
-        }
+    const pusher = new Pusher(PUSHER_KEY, {
+        cluster: PUSHER_CLUSTER,
+        forceTLS: true
     });
 
-    // 3. 監聽：新訂單 (管理者通知)
-    globalSource.addEventListener("new_order", function(e) {
-        if (userRole === "admin" || userRole === "sub-admin") {
-            try {
-                const data = JSON.parse(e.data);
-                // 排除自己下的測試單通知
-                if (data.username !== currentUser) {
-                    showNotificationDot("/admin/orders");
-                    
-                    // 播放音效
-                    alertAudio.play().catch(() => console.log("音效自動播放被瀏覽器阻擋"));
+    // --- A. 管理員邏輯 (監聽新訂單) ---
+    if (userRole === "admin" || userRole === "sub-admin") {
+        const adminChannel = pusher.subscribe('admin-channel');
+        
+        adminChannel.bind('new-order', function(data) {
+            // 排除自己下的測試單 (避免自己下單自己跳管理通知)
+            if (data.username !== currentUser) {
+                showNotificationDot("/admin/orders");
+                
+                // 橘色邊框彈窗 (管理員用)
+                showNotificationPopup(
+                    "🚨 新訂單通知", 
+                    `來自 <b>${data.username}</b> 的新訂單<br>單號：#${data.order_id}<br>金額：$${data.total}`,
+                    "/admin/orders",
+                    'admin' 
+                );
 
-                    if (typeof fetchOrders === "function") {
-                        fetchOrders(); // 如果在管理頁面就更新列表
-                        alert(`【新訂單通知】您有一筆新訂單！單號：#${data.order_id}`);
-                    } else {
-                        alert(`[店務通知] 有新訂單來了！單號：#${data.order_id}`);
-                    }
-                }
-            } catch (err) {
-                console.error("解析 new_order 失敗", err);
+                // 如果正在管理接單頁，自動刷新
+                if (typeof fetchOrders === "function") fetchOrders();
             }
+        });
+    }
+
+    // --- B. 使用者邏輯 (監聽自己的訂單狀態更新) ---
+    const userChannel = pusher.subscribe(`user-${currentUser}`);
+    
+    userChannel.bind('order-update', function(data) {
+        showNotificationDot("orders-btn");
+
+        // 綠色邊框彈窗 (一般使用者用)
+        showNotificationPopup(
+            "🍳 餐點進度更新", 
+            `訂單 <b>#${data.order_id}</b><br>最新狀態：<span style="color:#2e7d32; font-weight:bold;">${data.status}</span>`,
+            "/orders",
+            'user'
+        );
+
+        // 如果正在訂單記錄頁，2秒後刷新
+        if (window.location.pathname === "/orders") {
+            setTimeout(() => location.reload(), 2000);
         }
     });
-
-    // 4. 錯誤處理：連線斷開時不要 reload 頁面，而是重新連線 SSE
-    globalSource.onerror = function() {
-        console.warn("SSE 連線中斷，5秒後嘗試背景重連...");
-        globalSource.close();
-        setTimeout(setupSSE, 5000); // 治本：只重連線，不重整網頁
-    };
 }
 
 /**
- * 顯示紅點提醒
+ * 紅點提醒 (保持不變)
  */
 function showNotificationDot(targetId) {
-    // 顯示頭像外層紅點
     document.getElementById("user-container")?.classList.add("notification-dot");
-    
-    // 顯示選單內按鈕紅點
     const btn = document.querySelector(`button[data-url="${targetId}"]`) || document.getElementById(targetId);
     btn?.classList.add("notification-dot");
 }
 
-/**
- * 頁面載入後初始化
- */
 document.addEventListener("DOMContentLoaded", () => {
-    // 啟動 SSE
-    setupSSE();
-
-    // 綁定點擊事件：移除紅點
+    setupPusher();
     document.getElementById("user-icon")?.addEventListener("click", () => {
         document.getElementById("user-container")?.classList.remove("notification-dot");
     });
-
-    // 委派點擊事件給所有紅點按鈕
     document.addEventListener("click", (e) => {
-        if (e.target.classList.contains("notification-dot")) {
-            e.target.classList.remove("notification-dot");
-        }
+        const target = e.target.closest(".notification-dot");
+        if (target) target.classList.remove("notification-dot");
     });
 });
