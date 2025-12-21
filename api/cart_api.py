@@ -103,6 +103,13 @@ def checkout():
 
     full_cart_items = []
     grand_subtotal = 0
+
+    pickup_time = request.json.get("pickup_time")
+    if not pickup_time:
+         return jsonify({"message": "請選擇取餐時間"}), 400
+
+    note = request.json.get("note", "")
+
     deducted_log = []
 
     try:
