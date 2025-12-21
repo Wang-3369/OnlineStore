@@ -79,3 +79,84 @@
 }
 
 .delete-btn:hover { background: #ff2e44; }
+
+/* reviews.css - 使用者評論展示 */
+.review-page-container {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 25px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+.review-page-container h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #2d3748;
+    font-size: 1.8em;
+}
+
+/* 評論卡片 */
+.review-item {
+    background: #ffffff;
+    border: 1px solid #edf2f7;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    transition: all 0.3s ease;
+}
+
+.review-item:hover {
+    border-color: #667eea;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.1);
+}
+
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #f7fafc;
+    padding-bottom: 12px;
+    margin-bottom: 15px;
+}
+
+.review-rating {
+    color: #f59e0b; /* 金黃色星星 */
+    font-size: 1.1em;
+}
+
+.review-reply {
+    background: #f8fafc;
+    border-left: 4px solid #667eea;
+    padding: 15px;
+    margin-top: 15px;
+    border-radius: 0 10px 10px 0;
+    font-size: 0.95em;
+    color: #4a5568;
+}
+
+/* 按鈕組 */
+.review-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.review-actions button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85em;
+    font-weight: 600;
+    transition: 0.2s;
+}
+
+.delete-btn { background: #fff5f5; color: #c53030; }
+.delete-btn:hover { background: #fed7d7; }
+
+.reply-btn { background: #edf2f7; color: #4a5568; }
+.reply-btn:hover { background: #e2e8f0; }

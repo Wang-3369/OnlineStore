@@ -116,17 +116,23 @@ nav a:active {
     display: flex;
     flex-direction: column;
     gap: 15px;
-    transform: translateY(-100%);
+    transform: translateY(-20px) scale(0.95); 
     opacity: 0;
     pointer-events: none;
-    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-    z-index: 9999;
+    visibility: hidden; /* 防止隱藏時被點擊 */
+
+    /* 2. 關鍵：使用貝茲曲線，讓動畫有彈性、不僵硬 */
+    transition: 
+        transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1),
+        opacity 0.3s ease,
+        visibility 0.3s;
 }
 
 #user-slide-menu.show {
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
     opacity: 1;
     pointer-events: auto;
+    visibility: visible;
 }
 
 #user-slide-menu p,

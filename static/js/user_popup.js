@@ -1,47 +1,50 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const userContainer = document.getElementById('user-container');
     const userIcon = document.getElementById('user-icon');
     const userMenu = document.getElementById('user-slide-menu');
-    const loginBtn = document.getElementById('login-btn');
-    const logoutBtn = document.getElementById('logout-btn');
-    const orderBtn = document.getElementById('orders-btn');
-    const profileBtn = document.getElementById('profile-btn');
-    const favoritesBtn = document.getElementById("favorites-btn");
 
-    // 點擊圖示切換選單
+    // 1. 切換選單顯示
     userIcon.addEventListener('click', (e) => {
         userMenu.classList.toggle('show');
+        
+        // 增加圖示點擊縮放反饋
+        userIcon.style.transform = "scale(0.9)";
+        setTimeout(() => userIcon.style.transform = "", 150);
+        
         e.stopPropagation(); 
     });
 
-    // 點選外部收起選單
+    // 2. 點擊外部自動收起
     document.addEventListener('click', (e) => {
         if (!userMenu.contains(e.target) && e.target !== userIcon) {
             userMenu.classList.remove('show');
         }
     });
 
-    // 登入
-    if (loginBtn) loginBtn.addEventListener('click', () => location.href = "/login");
+    // 3. 通用導航跳轉 (避免重複寫多個 Listener)
+    const navigate = (id, url) => {
+        const btn = document.getElementById(id);
+        if (btn) btn.addEventListener('click', () => location.href = url);
+    };
 
-    // 登出
+    navigate('login-btn', '/login');
+    navigate('orders-btn', '/orders');
+    navigate('profile-btn', '/profile');
+    navigate('favorites-btn', '/favorites');
+
+    // 4. 管理者按鈕跳轉
+    document.querySelectorAll(".admin-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+            if (btn.dataset.url) location.href = btn.dataset.url;
+        });
+    });
+
+    // 5. 登出邏輯
+    const logoutBtn = document.getElementById('logout-btn');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', async () => {
+            logoutBtn.textContent = "處理中...";
             const res = await fetch("/api/logout", { method: "POST" });
             if (res.ok) location.href = "/";
         });
     }
-
-    // 訂單 & 個人介面 & 收藏頁面
-    if (orderBtn) orderBtn.addEventListener('click', () => location.href = "/orders");
-    if (profileBtn) profileBtn.addEventListener('click', () => location.href = "/profile");
-    if (favoritesBtn)favoritesBtn.addEventListener("click", () => location.href = "/favorites");
-
-    // 管理者按鈕統一綁定
-    document.querySelectorAll(".admin-btn").forEach(btn => {
-        btn.addEventListener("click", () => {
-            const url = btn.dataset.url;
-            if (url) location.href = url;
-        });
-    });
 });
