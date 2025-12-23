@@ -401,3 +401,9 @@ input[type="file"] {
     }
 
 }
+
+.submit-btn:disabled {
+    background-color: #46da5a;
+    cursor: not-allowed;
+    opacity: 0.8;
+}

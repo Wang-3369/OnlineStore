@@ -880,3 +880,43 @@ main > * {
 .notification-dot::after {
     animation: pulse-red 1.5s infinite !important;
 }
+
+#user-slide-menu .close-x {
+    position: absolute;
+    top: 20px;
+    right: 25px;
+    /* 取消全局按鈕可能的背景與邊框 */
+    background: rgba(255, 255, 255, 0.15); 
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    font-size: 30px;
+    font-weight: 300;
+    cursor: pointer;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    /* 確保層級夠高 */
+    z-index: 1002; 
+    padding: 0; /* 強制重置全局按鈕的內距 */
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+#user-slide-menu .close-x:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: rotate(90deg) scale(1.1);
+    color: #ff4d4d;
+}
+
+/* 手機版適應：讓 X 更容易觸碰 */
+@media (max-width: 768px) {
+    .close-x {
+        top: 15px;
+        right: 15px;
+        width: 50px;
+        height: 50px;
+    }
+}
