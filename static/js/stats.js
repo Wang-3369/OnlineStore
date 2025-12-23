@@ -210,17 +210,34 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ===== 載入所有數據的總發動機 =====
+// ===== 載入所有數據的總發動機 (修正版) =====
 async function updateAllStats() {
-    // 1. 更新圖表
-    if (barMode === "product") await loadBarChartByProduct();
-    else await loadBarChartByDate();
-    
-    // 如果折線圖或圓餅圖是顯示狀態，也更新它們
-    if(document.getElementById("lineChart").style.display !== "none") loadLineChart();
-    if(document.getElementById("pieChart").style.display !== "none") loadPieChart();
+    // 1. 先更新上方數據卡片 (這是共用的)
+    await refreshRevenue();
 
-    // 2. 更新上方數據卡片
-    refreshRevenue();
+    // 2. 判斷目前哪種圖表的 Canvas 是顯示狀態 (display !== "none")，只更新該圖表
+    const isBarVisible = document.getElementById("barChart").style.display !== "none";
+    const isLineVisible = document.getElementById("lineChart").style.display !== "none";
+    const isPieVisible = document.getElementById("pieChart").style.display !== "none";
+
+    // 只有在長條圖顯示時，才根據 barMode 更新長條圖
+    if (isBarVisible) {
+        if (barMode === "product") {
+            await loadBarChartByProduct();
+        } else {
+            await loadBarChartByDate();
+        }
+    }
+
+    // 只有在折線圖顯示時，才更新折線圖
+    if (isLineVisible) {
+        await loadLineChart();
+    }
+
+    // 只有在圓餅圖顯示時，才更新圓餅圖
+    if (isPieVisible) {
+        await loadPieChart();
+    }
 }
 
 // ===== 更新營業額卡片 =====
