@@ -29,6 +29,7 @@
             >
             
             <div id="user-slide-menu">
+                <button id="close-menu-btn" class="close-x">&times;</button>
                 {% if session.get("username") %}
                     <p id="username">使用者：{{ session.get("username") }}</p>
                     <button id="orders-btn">查看訂單</button>

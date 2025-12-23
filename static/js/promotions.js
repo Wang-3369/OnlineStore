@@ -46,12 +46,38 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     uploadForm?.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const res = await fetch("/api/promotions/upload", { method: "POST", body: new FormData(uploadForm) });
-        if (res.ok) {
-            alert("發布成功");
-            uploadForm.reset();
-            loadPromotions();
+        e.preventDefault(); // 先阻止表單預設跳轉行為
+
+        // 1. 定位提交按鈕 (通常是最後一個按鈕或有 submit 類型的按鈕)
+        const submitBtn = uploadForm.querySelector('button[type="submit"]');
+        
+        // 2. 進入「處理中」狀態
+        const originalText = submitBtn.innerText; // 備份原始文字 (例如 "發布促銷活動")
+        submitBtn.disabled = true;                // 禁用按鈕防止重複點擊
+        submitBtn.innerText = "處理中...";         // 更改按鈕文字
+
+        try {
+            const res = await fetch("/api/promotions/upload", { 
+                method: "POST", 
+                body: new FormData(uploadForm) 
+            });
+
+            if (res.ok) {
+                uploadForm.reset();     // 清空表單
+                loadPromotions();      // 刷新列表
+                // 重置範圍選單隱藏狀態
+                document.getElementById("scope-value-container").style.display = "none";
+            } else {
+                const errorMsg = await res.text();
+                alert("發布失敗：" + errorMsg);
+            }
+        } catch (error) {
+            console.error("上傳錯誤:", error);
+            alert("網路連線異常，請稍後再試");
+        } finally {
+            // 3. 無論成功或失敗，最後都「恢復」按鈕狀態
+            submitBtn.disabled = false;
+            submitBtn.innerText = originalText;
         }
     });
 

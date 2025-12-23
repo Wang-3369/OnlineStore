@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
     const userIcon = document.getElementById('user-icon');
     const userMenu = document.getElementById('user-slide-menu');
-
+    const closeMenuBtn = document.getElementById('close-menu-btn');
     // 1. 切換選單顯示
     userIcon.addEventListener('click', (e) => {
         userMenu.classList.toggle('show');
@@ -12,6 +12,12 @@ document.addEventListener("DOMContentLoaded", () => {
         
         e.stopPropagation(); 
     });
+
+    if (closeMenuBtn) {
+        closeMenuBtn.addEventListener('click', () => {
+            userMenu.classList.remove('show');
+        });
+    }
 
     // 2. 點擊外部自動收起
     document.addEventListener('click', (e) => {
