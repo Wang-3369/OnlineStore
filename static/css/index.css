@@ -235,34 +235,37 @@ html {
 /* ===== 響應式調整 ===== */
 @media (max-width: 900px) {
     .promo-slider-container {
-        width: 92%;
-        height: 200px;
-        margin: 20px auto;
+        width: 95%;
+        height: 180px;
+        margin: 15px auto;
     }
     .promo-slider img {
         padding: 10px;
     }
-    
+
     .main-container {
         flex-direction: column;
-        padding: 0 10px; /* 🔧 手機版減少左右 padding */
+        padding: 0 10px;
+        margin: 10px auto;
+        overflow-x: hidden; /* 確保主容器不產生橫向滾動 */
+        width: 100vw;
     }
 
     .category-sidebar {
         width: 100%;
         position: sticky;
-        top: 0;
+        top: 80px; /* 根據你的 Header 高度調整 */
         z-index: 100;
-        display: flex;
-        overflow-x: auto;
-        padding: 10px;
-        gap: 10px;
+        display: block; /* 恢復 block */
+        overflow-x: auto; /* 讓分類欄自己內部滾動 */
+        -webkit-overflow-scrolling: touch;
     }
 
     #category-list {
         display: flex;
-        width: max-content;
+        flex-wrap: nowrap; /* 強制不換行，讓它橫向滾動 */
         gap: 10px;
+        padding-bottom: 10px;
     }
 
     #category-list button {
@@ -272,6 +275,24 @@ html {
     }
     
     .product-list {
-        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); /* 🔧 手機版縮小卡片 */
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 12px;
+        padding: 10px 0;
     }
+    
+    .product-card {
+        padding: 10px; /* 縮小內距 */
+    }
+}
+
+.main-container {
+    display: flex;
+    max-width: 1400px;
+    width: 100%; 
+    margin: 40px auto;
+    padding: 0 15px; /* 這裡縮小 padding */
+    gap: 20px;
+    align-items: flex-start;
+    box-sizing: border-box; /* 確保 padding 不增加總寬度 */
+    overflow-x: hidden; /* 強制隱藏橫向溢出 */
 }

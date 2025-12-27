@@ -1,0 +1,18 @@
+{
+  "name": "onlinestore",
+  "version": "1.0.0",
+  "description": "這是一個使用 **Flask + MongoDB** 製作的線上早餐店點餐系統，目前包含「商品列表、購物車、結帳、使用者登入」等功能。\r ### 1️⃣ 下載專案\r ```bash\r 建立.env\r git clone https://github.com/Wang-3369/OnlineStore\r cd OnlineStore\r python -m venv venv\r # Windows\r venv\\Scripts\\activate\r # macOS / Linux\r source venv/bin/activate",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "cypress": "^15.8.1"
+  }
+}
